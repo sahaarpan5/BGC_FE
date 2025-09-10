@@ -178,7 +178,7 @@ const DashboardScreen = () => {
 
 
                                 <View style={styles.popupheader}>
-                                    <Text style={styles.headerTitle}>verification Details</Text>
+                                    <Text style={styles.headerTitle}>Verification Details</Text>
 
                                 </View>
 
@@ -326,6 +326,7 @@ const DashboardScreen = () => {
                                  <TouchableOpacity style={[{ width: '80%'},styles.continueButton]} onPress={() => {
                                         
                                         setVerificationModalVisible(false);
+                                        navigation.navigate('VerificationForm');
                                     }}>
                                         <Text style={styles.continueText}>Start Verification</Text>
                                     </TouchableOpacity>
