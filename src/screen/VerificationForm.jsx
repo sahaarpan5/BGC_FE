@@ -18,6 +18,7 @@ import {
 
 
 const VerificationForm = () => {
+    const navigation=useNavigation();
 
 
     return (
@@ -156,8 +157,8 @@ const VerificationForm = () => {
                             <TextInput style={styles.inputText} ></TextInput>
                         </View>
                     </View>
-                    <TouchableOpacity style={styles.detailsButton}>
-                        <Text style={styles.detailsText}>Submit</Text>
+                    <TouchableOpacity style={styles.detailsButton} onPress={() => navigation.replace('VerfifcationDocument')}>
+                        <Text style={styles.detailsText}>Save & Next</Text>
                     </TouchableOpacity>
 
                     <View style={{height:40}}></View>

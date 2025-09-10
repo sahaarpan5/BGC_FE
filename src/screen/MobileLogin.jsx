@@ -46,7 +46,7 @@ const MobileLogin = () => {
                        
                     </View>
 
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('DashboardScreen')}>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.replace('DashboardScreen')}>
                         <Text style={styles.buttonText}>Login</Text>
                     </TouchableOpacity>
                 </View>
