@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import MobileLogin from '../screen/MobileLogin';
 import DashboardScreen from '../screen/DashboardScreen';
+import VerificationForm from '../screen/VerificationForm';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ const AppNavigator = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="MobileLogin">
         <Stack.Screen name="MobileLogin" component={MobileLogin} />
         <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
+         <Stack.Screen name="VerificationForm" component={VerificationForm} />
        
       </Stack.Navigator>
 
