@@ -15,6 +15,9 @@ import {
     Modal,
 
 } from 'react-native';
+import API from '../utility/API';
+import { Loader } from '../utility/Loader';
+import axios from 'axios';
 
 
 const DashboardScreen = () => {
@@ -22,6 +25,8 @@ const DashboardScreen = () => {
     const [verificationModalVisible, setVerificationModalVisible] = useState(false);
     const [name, setName] = useState('');
     const [profilePic, setProfilePic] = useState(null);
+    const [caseList, setCaseList] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const navigation = useNavigation()
 
@@ -50,50 +55,41 @@ const DashboardScreen = () => {
         };
 
         loadData();
+        fetchCases();
     }, []);
 
-    const data = [
-        {
-            id: "1",
-            name: "Chandan Thakur",
-            contact: "+91 9876543210",
-            address: "Kolkata, West Bengal",
-            status: "Ongoing",
-            latitude: 19.076,
-            longitude: 72.8777,
-            assignedDate: '17 Aug, 2025'
-        },
-        {
-            id: "2",
-            name: "Amit Sharma",
-            contact: "+91 9123456789",
-            address: "Delhi, India",
-            status: "Hold",
-            latitude: 19.076,
-            longitude: 72.8777,
-            assignedDate: '10 Aug, 2025'
-        },
-        {
-            id: "3",
-            name: "Priya Verma",
-            contact: "+91 9988776655",
-            address: "Bangalore, Karnataka",
-            status: "Pending",
-            latitude: 19.076,
-            longitude: 72.8777,
-            assignedDate: '09 Aug, 2025'
-        },
-        {
-            id: "4",
-            name: "Rahul Singh",
-            contact: "+91 8877665544",
-            address: "Mumbai, Maharashtra",
-            status: "Done",
-            latitude: 19.076,
-            longitude: 72.8777,
-            assignedDate: '08 Aug, 2025'
-        },
-    ];
+    const fetchCases = async () => {
+        try {
+            setLoading(true);
+
+            // Get vendor ID or token from AsyncStorage
+            const id = await AsyncStorage.getItem('responseText');
+
+            // Make API call using the common API class
+            const response = await axios.get(API.CASE_LIST(id));
+            const res = response.data;
+            console.log('Case List:', res);
+
+            if (res.responseStatus && Array.isArray(res.responseData)) {
+                const formatted = res.responseData.map((item, index) => ({
+                    id: index.toString(),
+                    name: item.Candidate?.FULLNAME || 'Unknown',
+                    contact: item.Candidate?.MobileNumber || 'N/A',
+                    company: item.Candidate?.CompanyId || 'N/A',
+                    assignedDate: item.Assign?.AssignedOn || 'N/A',
+                    address: item.Address?.AddressLine1 || '',
+                }));
+
+                setCaseList(formatted);
+            }
+        } catch (error) {
+            console.error('Error fetching cases:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
 
     const openMap = (lat, lng, label) => {
         const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
@@ -112,36 +108,42 @@ const DashboardScreen = () => {
             styles.card,
             { backgroundColor: index % 2 === 0 ? "#fff" : "#fcfcffff" }, // alternate bg
         ]}>
+            <View style={{ backgroundColor: '#0d036bff', borderTopLeftRadius: 12, borderTopRightRadius: 12, paddingVertical: 10, paddingHorizontal: 5, marginBottom: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <Image source={require('../asset/clock-icon.png')} style={styles.clockicon}></Image>
+                    <Text style={styles.date}>{item.assignedDate}</Text>
+                </View>
+                <Text style={[styles.name, { color: '#FFFFFF', marginVertical: 5 }]}>{item.company}</Text>
+
+            </View>
             {/* Candidate Details */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
-                <Image source={require('../asset/clock-icon.png')} style={styles.clockicon}></Image>
-                <Text style={styles.date}>{item.assignedDate}</Text>
-            </View>
-            <View style={styles.addressRow}>
-                <Image source={require('../asset/profile.png')} style={styles.rawicon}></Image>
-                <Text style={styles.name}>{item.name}</Text>
-            </View>
 
-            <TouchableOpacity onPress={() => openDialPad(item.contact)} style={styles.addressRow}>
-                <Image source={require('../asset/telephone.png')} style={styles.rawicon}></Image>
-                <Text style={styles.contact}>{item.contact}</Text>
-            </TouchableOpacity>
+            <View style={{ padding: 10 }}>
+                <View style={styles.addressRow}>
+                    <Image source={require('../asset/profile.png')} style={styles.rawicon}></Image>
+                    <Text style={styles.contact}>{item.name}</Text>
+                </View>
 
-
-            <TouchableOpacity style={styles.addressRow} onPress={() => openMap(item.latitude, item.longitude, item.address)}>
-                {/* <Icon name="map-marker" size={18} color="#555" /> */}
-                <Image source={require('../asset/google-maps.png')} style={styles.rawicon}></Image>
-                <Text style={styles.address}>{item.address}</Text>
-            </TouchableOpacity>
-
-            {/* Buttons */}
-            <View style={styles.footer}>
-                <TouchableOpacity style={styles.detailsButton} onPress={() => setModalVisible(true)}>
-                    <Text style={styles.detailsText}>View Details</Text>
+                <TouchableOpacity onPress={() => openDialPad(item.contact)} style={styles.addressRow}>
+                    <Image source={require('../asset/telephone.png')} style={styles.rawicon}></Image>
+                    <Text style={styles.contact}>{item.contact}</Text>
                 </TouchableOpacity>
 
 
+
+
+                {/* Buttons */}
+                <View style={styles.footer}>
+                    <TouchableOpacity style={styles.detailsButton} onPress={() => setModalVisible(true)}>
+                        <Text style={styles.detailsText}>View Details</Text>
+                    </TouchableOpacity>
+
+
+                </View>
             </View>
+
+
+
 
 
         </View>
@@ -150,6 +152,7 @@ const DashboardScreen = () => {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#E8151582' }}>
             <View style={styles.container}>
+                {loading && <Loader />}
                 {/* Header with ImageBackground */}
                 <ImageBackground
                     source={require('../asset/app-bg.png')} // 🔹 your gradient background image
@@ -192,7 +195,7 @@ const DashboardScreen = () => {
                         </View>
 
                         <FlatList
-                            data={data}
+                            data={caseList}
                             keyExtractor={(item) => item.id}
                             renderItem={renderItem}
                             contentContainerStyle={{ paddingBottom: 20 }}
@@ -464,7 +467,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 15,
         marginVertical: 8,
         borderRadius: 12,
-        padding: 15,
+
         shadowColor: "#000",
         shadowOpacity: 0.1,
         shadowOffset: { width: 0, height: 2 },
@@ -481,7 +484,7 @@ const styles = StyleSheet.create({
     date: {
         fontSize: 12,
         fontWeight: "300",
-        color: "#757575ff",
+        color: "#ffffffff",
     },
     contact: {
         fontSize: 14,
@@ -547,9 +550,10 @@ const styles = StyleSheet.create({
         width: 20
     },
     clockicon: {
-        height: 20,
-        width: 20,
-        marginRight: 5
+        height: 14,
+        width: 14,
+        marginRight: 5,
+        tintColor: '#FFFFFF'
     },
 
     rawicon: {
