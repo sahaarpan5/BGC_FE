@@ -1,5 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -19,8 +20,37 @@ import {
 const DashboardScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [verificationModalVisible, setVerificationModalVisible] = useState(false);
+    const [name, setName] = useState('');
+    const [profilePic, setProfilePic] = useState(null);
 
     const navigation = useNavigation()
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const storedUserName = await AsyncStorage.getItem('FullName');
+                const storedPic = await AsyncStorage.getItem('ProfilePicture');
+                setName(storedUserName);
+
+                if (storedPic) {
+                    // Replace backslashes in the URL
+                    const cleanUrl = storedPic.replace(/\\/g, '/');
+                    setProfilePic(cleanUrl);
+                }
+
+
+
+
+
+
+
+            } catch (error) {
+                console.error('Error loading stored data:', error);
+            }
+        };
+
+        loadData();
+    }, []);
 
     const data = [
         {
@@ -134,11 +164,21 @@ const DashboardScreen = () => {
                         <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
                             <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', right: 40 }}>
                                 <Image source={require('../asset/side-navigation-icon.png')} style={{ width: 40, height: 40, marginRight: 25 }}></Image>
-                                <Image source={require('../asset/user-image.png')} ></Image>
+                                {profilePic ? (
+                                    <Image
+                                        source={{ uri: profilePic }}
+                                        style={{ width: 50, height: 50, borderRadius: 25 }}
+                                    />
+                                ) : (
+                                    <Image
+                                        source={require('../asset/user-image.png')}
+                                        style={{ width: 50, height: 50, borderRadius: 25 }}
+                                    />
+                                )}
                             </TouchableOpacity>
 
 
-                            <Text style={styles.userName}>Chandan Thakur</Text>
+                            <Text style={styles.userName}>{name}</Text>
                         </View>
 
                     </View>
@@ -232,7 +272,7 @@ const DashboardScreen = () => {
                                         </View>
                                     </View>
 
-                                    <TouchableOpacity style={[{ width: '100%'},styles.continueButton]} onPress={() => {
+                                    <TouchableOpacity style={[{ width: '100%' }, styles.continueButton]} onPress={() => {
                                         setModalVisible(false);
                                         setVerificationModalVisible(true);
                                     }}>
@@ -279,7 +319,7 @@ const DashboardScreen = () => {
                                     <View style={styles.roundCircle}>
                                         <Image
                                             source={require('../asset/from-icon.png')}
-                                           
+
                                         />
                                     </View>
 
@@ -296,7 +336,7 @@ const DashboardScreen = () => {
                                     <View style={styles.roundCircle}>
                                         <Image
                                             source={require('../asset/document-icon.png')}
-                                           
+
                                         />
                                     </View>
                                     <View style={{ flex: 1 }}>
@@ -311,7 +351,7 @@ const DashboardScreen = () => {
                                     <View style={styles.roundCircle}>
                                         <Image
                                             source={require('../asset/selfie-icon.png')}
-                                           
+
                                         />
                                     </View>
                                     <View style={{ flex: 1 }}>
@@ -323,13 +363,13 @@ const DashboardScreen = () => {
                                 </View>
 
 
-                                 <TouchableOpacity style={[{ width: '80%'},styles.continueButton]} onPress={() => {
-                                        
-                                        setVerificationModalVisible(false);
-                                        navigation.navigate('VerificationForm');
-                                    }}>
-                                        <Text style={styles.continueText}>Start Verification</Text>
-                                    </TouchableOpacity>
+                                <TouchableOpacity style={[{ width: '80%' }, styles.continueButton]} onPress={() => {
+
+                                    setVerificationModalVisible(false);
+                                    navigation.navigate('VerificationForm');
+                                }}>
+                                    <Text style={styles.continueText}>Start Verification</Text>
+                                </TouchableOpacity>
 
 
 
@@ -614,7 +654,7 @@ const styles = StyleSheet.create({
         marginRight: 10
     },
     continueButton: {
-       
+
         height: 40,
         borderRadius: 8,
         backgroundColor: '#006699',
@@ -659,8 +699,8 @@ const styles = StyleSheet.create({
         width: 45,
         height: 45,
         alignItems: 'center',
-        alignContent:'center',
-        justifyContent:'center'
+        alignContent: 'center',
+        justifyContent: 'center'
     },
     verificationStepText: {
         fontSize: 14,
