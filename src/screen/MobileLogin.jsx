@@ -26,52 +26,86 @@ const MobileLogin = () => {
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
-        if (!mobileNumber || !password) {
-            Alert.alert('Validation', 'Please enter both Mobile Number and Password');
-            return;
-        }
+  if (!mobileNumber || !password) {
+    Alert.alert('Validation', 'Please enter both Mobile Number and Password');
+    return;
+  }
 
-        setLoading(true);
-        try {
-            const formData = new FormData();
-            formData.append('_id_', mobileNumber);
-            formData.append('_pass_', password);
+  setLoading(true);
+  try {
+    // 🔹 Prepare x-www-form-urlencoded data
+    const formBody = new URLSearchParams();
+    formBody.append('username', mobileNumber);
+    formBody.append('password', password);
+    formBody.append('grant_type', 'password');
 
-            // Axios POST request with multipart/form-data
-            const response = await axios.post(API.LOGIN, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+    // 🔹 Step 1: Login API
+    const response = await axios.post(
+      API.LOGIN,
+      formBody.toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
 
-            const res = response.data;
-            console.log('Login Response:', res);
+    const data = response.data;
+    console.log('Login Response:', data);
 
-            if (res.responseStatus) {
+    const accessToken = data.access_token;
+    const secureID = data.SecurID;
 
+    // 🔹 Validate credentials
+    if (!accessToken || !secureID) {
+      Alert.alert('Login Failed', 'Invalid credentials');
+      setLoading(false);
+      return;
+    }
 
-                const { responseText, responseData } = res;
-                await AsyncStorage.setItem('responseText', responseText || '');
-                await AsyncStorage.setItem('FullName', responseData?.FullName || '');
-                await AsyncStorage.setItem('MobileNumber', responseData?.MobileNumber || '');
-                await AsyncStorage.setItem('ProfilePicture', responseData?.ProfilePicture || '');
-                await AsyncStorage.setItem('FEVendorID', responseData?.FEVendorID?.toString() || '');
-                await AsyncStorage.setItem('UserId', responseData?.UserId?.toString() || '');
-                
+    // 🔹 Save tokens
+    await AsyncStorage.multiSet([
+      ['access_token', accessToken],
+      ['SecurID', secureID],
+    ]);
 
+    // 🔹 Step 2: Fetch profile using secureID
+    const profileResponse = await axios.get(
+      API.Profile(secureID),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
 
+    const profileData = profileResponse.data;
+    console.log('Profile Response:', profileData);
 
-                navigation.replace('DashboardScreen')
-            } else {
-                Alert.alert('Login Failed', res.responseText || 'Invalid credentials');
-            }
-        } catch (error) {
-            console.error(error);
-            Alert.alert('Error', 'Something went wrong. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    // 🔹 Step 3: Validate and save profile data
+    if (profileData.responseStatus && profileData.responseData) {
+      const user = profileData.responseData;
+
+      await AsyncStorage.multiSet([
+        ['responseText', profileData.responseText || ''],
+        ['FullName', user.FullName || ''],
+        ['MobileNumber', user.MobileNumber || ''],
+        ['ProfilePicture', user.ProfilePicture || ''],
+        ['FEVendorID', String(user.FEVendorID || '')],
+        ['UserId', String(user.UserId || '')],
+      ]);
+
+      navigation.replace('DashboardScreen');
+    } else {
+      Alert.alert('Error', 'Failed to fetch profile details');
+    }
+  } catch (error) {
+    console.error('Login Error:', error);
+    Alert.alert('Error', 'Something went wrong. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
     return (
         <View style={styles.container}>

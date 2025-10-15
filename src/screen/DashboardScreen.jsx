@@ -13,11 +13,15 @@ import {
     FlatList,
     Linking,
     Modal,
+    Alert,
+    PermissionsAndroid,
 
 } from 'react-native';
 import API from '../utility/API';
 import { Loader } from '../utility/Loader';
 import axios from 'axios';
+import Geocoder from 'react-native-geocoding';
+import Geolocation from '@react-native-community/geolocation';
 
 
 const DashboardScreen = () => {
@@ -27,6 +31,16 @@ const DashboardScreen = () => {
     const [profilePic, setProfilePic] = useState(null);
     const [caseList, setCaseList] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [caseDetails, setCaseDetails] = useState(null);
+    const [location, setLocation] = useState(null);
+    const [address, setAddress] = useState('Fetching address......');
+    const defaultLat = 10.10;
+    const defaultLng = 10.10;
+
+    const [coords, setCoords] = useState({
+        latitude: defaultLat,
+        longitude: defaultLng,
+    });
 
     const navigation = useNavigation()
 
@@ -58,6 +72,99 @@ const DashboardScreen = () => {
         fetchCases();
     }, []);
 
+
+    useEffect(() => {
+
+        const getLocation = async () => {
+            try {
+                setLoading(true);
+                if (Platform.OS === 'android') {
+                    const granted = await PermissionsAndroid.request(
+                        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+                        {
+                            title: 'Location Permission',
+                            message: 'This app needs access to your location to mark attendance.',
+                            buttonNeutral: 'Ask Me Later',
+                            buttonNegative: 'Cancel',
+                            buttonPositive: 'OK',
+                        }
+                    );
+
+                    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                        Alert.alert('Permission Denied', 'Location permission is required.');
+                        setLoading(false);
+                        return;
+                    }
+                } else {
+                    Geolocation.requestAuthorization();
+                    // const permission = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+                    // if (permission !== RESULTS.GRANTED) {
+                    //   Alert.alert('Permission Denied', 'Location permission is required.');
+                    //   return;
+                    // }
+                    // iOS only
+                }
+
+                // Now get location
+                Geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        console.log('📍 Current Coordinates =>');
+                        console.log('Latitude:', latitude);
+                        console.log('Longitude:', longitude);
+                        setCoords({ latitude, longitude });
+                        setLocation({
+                            latitude,
+                            longitude,
+                            latitudeDelta: 0.005,
+                            longitudeDelta: 0.005,
+                        });
+
+
+
+
+                        Geocoder.from(latitude, longitude)
+                            .then((json) => {
+                                if (json.results.length > 0) {
+                                    const address = json.results[0].formatted_address;
+                                    setAddress(address);
+                                } else {
+                                    setAddress('Address not found');
+                                }
+
+                                setLoading(false);
+                            })
+                            .catch((error) => {
+                                console.warn('❌ Geocoding error:', error);
+                                setAddress('Unable to get address');
+                                setLoading(false);
+                            });
+                    },
+                    (error) => {
+                        console.warn('❌ Error getting location:', error);
+                        Alert.alert(
+                            'Location Error',
+                            'Unable to fetch your location. Please enable GPS and try again.'
+                        );
+                        setAddress('Unable to get location');
+                        setLoading(false);
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 100000,
+                        maximumAge: 10000,
+                    }
+                );
+            } catch (err) {
+                console.warn('❌ Permission or location error:', err);
+                Alert.alert('Error', 'An unexpected error occurred while getting your location.');
+                setLoading(false);
+            }
+        };
+
+        getLocation();
+    }, []);
+
     const fetchCases = async () => {
         try {
             setLoading(true);
@@ -76,18 +183,123 @@ const DashboardScreen = () => {
                     name: item.Candidate?.FULLNAME || 'Unknown',
                     contact: item.Candidate?.MobileNumber || 'N/A',
                     company: item.Candidate?.CompanyId || 'N/A',
+                    SecureID: item.Candidate?.SecureID || 'N/A',
                     assignedDate: item.Assign?.AssignedOn || 'N/A',
                     address: item.Address?.AddressLine1 || '',
+                    CandidateID: item.Candidate?.CandidateID || 'N/A',
                 }));
 
                 setCaseList(formatted);
+            } else {
+                Alert.alert('No details found');
             }
         } catch (error) {
             console.error('Error fetching cases:', error);
         } finally {
+            // setLoading(false);
+        }
+    };
+
+
+    const fetchCaseDetails = async (secureId) => {
+        try {
+            setModalVisible(false);
+            setLoading(true);
+            const response = await axios.get(API.CASE_DETAILS(secureId));
+            const res = response.data;
+
+            if (res.responseStatus && res.responseData.length > 0) {
+                setCaseDetails(res.responseData[0]);
+                setModalVisible(true);
+            } else {
+                Alert.alert('No details found for this case.');
+            }
+        } catch (error) {
+            console.error('Error fetching case details:', error);
+            Alert.alert('Failed to fetch case details.');
+        } finally {
             setLoading(false);
         }
     };
+
+
+    const addressNotification = async (secureId) => {
+        try {
+            setModalVisible(false);
+            setLoading(true);
+
+            const response = await axios.get(API.NOTIFICATION_ADDRESS(secureId));
+            const res = response.data;
+
+            if (res.responseStatus) {
+                Alert.alert('Resquest has been sent successfully');
+            } else {
+                Alert.alert('No details found for this case.');
+            }
+        } catch (error) {
+            console.error('Error fetching case details:', error);
+            Alert.alert('Failed to fetch case details.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const sendLocationData = async (candidateID, candidateName,address,contactNumber,lat,lng) => {
+        setLoading(true);
+        setVerificationModalVisible(false);
+
+        if (!coords) {
+            console.log('Coordinates not available yet');
+            setLoading(false);
+            Alert.alert('Coordinates not available yet')
+            return;
+        }
+
+        const id = await AsyncStorage.getItem('UserId');
+        console.log('id', id);
+        console.log('CandidateId', candidateID);
+
+        const url = API.STARTVERFICATION;
+        console.log('url', url);
+
+        const formData = new FormData();
+        formData.append('CandidateId', candidateID);
+        formData.append('UserId', id.toString());
+        formData.append('Lat', coords.latitude.toString());
+        formData.append('Lng', coords.longitude.toString());
+
+        try {
+            const response = await axios.post(url, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            console.log('📡 API Response:', response.data);
+            setLoading(false);
+
+            if (response.data.responseStatus === true) {
+                navigation.navigate('VerificationForm', {
+                    candidateId: candidateID,
+                    candidateName: candidateName,
+                    address: address,
+                     contactNumber: contactNumber,
+                     latt:lat,
+                     lng:lng
+                });
+                console.log('✅ Success! Data saved.');
+            } else {
+                console.log('❌ Failed:', response.data);
+                Alert.alert('Failed', 'Unable to start verification.');
+            }
+        } catch (error) {
+            setLoading(false);
+            console.error('Error sending data:', error);
+            Alert.alert('Network Error', 'Unable to connect to server.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
 
 
@@ -129,12 +341,18 @@ const DashboardScreen = () => {
                     <Text style={styles.contact}>{item.contact}</Text>
                 </TouchableOpacity>
 
+                <View style={styles.addressRow}>
+                    <Image source={require('../asset/google-maps.png')} style={styles.rawicon}></Image>
+                    <Text style={[styles.contact, { width: "95%" }]}>{item.address}</Text>
+                </View>
+
+
 
 
 
                 {/* Buttons */}
                 <View style={styles.footer}>
-                    <TouchableOpacity style={styles.detailsButton} onPress={() => setModalVisible(true)}>
+                    <TouchableOpacity style={styles.detailsButton} onPress={() => fetchCaseDetails(item.SecureID)}>
                         <Text style={styles.detailsText}>View Details</Text>
                     </TouchableOpacity>
 
@@ -222,58 +440,100 @@ const DashboardScreen = () => {
 
                                 <View style={styles.popupheader}>
                                     <Text style={styles.headerTitle}>Verification Details</Text>
+                                    <TouchableOpacity style={styles.addrequestButton}
+                                        onPress={() => fetchCaseDetails(caseDetails?.Candidate?.SecureID)}>
+                                        <Text style={{ fontSize: 12, color: '#FFF' }}>Refresh</Text>
+                                        <Image
+                                            source={require('../asset/refresh.png')}
+                                            style={{ height: 15, width: 15, tintColor: '#FFF', marginLeft: 5 }}
+                                        />
+                                    </TouchableOpacity>
 
                                 </View>
 
                                 <View style={{ flex: 1, paddingHorizontal: 10 }}>
                                     <View style={{ marginVertical: 5 }}>
                                         <Text style={styles.userNameTitle}>Candidate Name</Text>
-                                        <Text style={styles.valuePopup}>Arpan Saha</Text>
+                                        <Text style={styles.valuePopup}>{caseDetails?.Candidate?.FULLNAME || 'N/A'}</Text>
                                     </View>
 
                                     <TouchableOpacity style={{ marginVertical: 10 }}>
-                                        <Text style={styles.userNameTitle}>Candidate Contact Number</Text>
-                                        <Text style={styles.valuePopup}>9804043285</Text>
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <Text style={styles.userNameTitle}>Contact Number</Text>
+                                        </View>
+
+                                        <Text style={styles.valuePopup}>{caseDetails?.Candidate?.MobileNumber || 'N/A'}</Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity style={{ marginVertical: 10 }}>
-                                        <Text style={styles.userNameTitle}>Candidate Address</Text>
-                                        <Text style={styles.valuePopup}>Sodepur,Sadhurmore</Text>
+                                        <Text style={styles.userNameTitle}>Alternative Number</Text>
+                                        <Text style={styles.valuePopup}>{caseDetails?.Address?.AltPhone || 'N/A'}</Text>
                                     </TouchableOpacity>
+
+                                    <View style={{ marginVertical: 10 }}>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                                            <Text style={styles.userNameTitle}>Address</Text>
+
+                                            {caseDetails?.AddressConfirmation?.IsVerifiedByCandidate ? (
+                                                // ✅ Show View on Map if verified
+                                                <TouchableOpacity
+                                                    onPress={() =>
+                                                        openMap(
+                                                            caseDetails?.AddressConfirmation?.Latitude,
+                                                            caseDetails?.AddressConfirmation?.Longitude
+                                                        )
+                                                    }
+                                                    style={styles.viewMapButton}
+                                                >
+                                                    <Text style={styles.userNameTitle}>View on Map</Text>
+                                                    <Image
+                                                        source={require('../asset/google-maps.png')}
+                                                        style={{ height: 15, width: 15, marginLeft: 5 }}
+                                                    />
+                                                </TouchableOpacity>
+                                            ) : (
+                                                // ❌ Show Send Address Request if not verified
+                                                <TouchableOpacity
+                                                    onPress={() => addressNotification(caseDetails?.Candidate?.SecureID)}
+                                                    style={styles.addrequestButton}
+                                                >
+                                                    <Text style={[styles.userNameTitle, { color: '#fff' }]}>
+                                                        Request for GPS Coordinates
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+
+                                        <Text style={styles.valuePopup}>
+                                            {caseDetails?.Address?.AddressLine1 || 'N/A'}
+                                        </Text>
+                                    </View>
+
+                                    <View style={{ marginVertical: 10 }}>
+                                        <Text style={styles.userNameTitle}>Father's Name</Text>
+                                        <Text style={styles.valuePopup}>{caseDetails?.Candidate?.FatherName || 'N/A'}</Text>
+                                    </View>
 
 
                                     <View style={{ marginVertical: 10 }}>
                                         <Text style={styles.userNameTitle}>Company Details</Text>
-                                        <Text style={styles.valuePopup}>Fedbank Ltd.</Text>
+                                        <Text style={styles.valuePopup}>{caseDetails?.Candidate?.CompanyId || 'N/A'}</Text>
                                     </View>
 
 
                                     <View style={{ marginVertical: 10 }}>
                                         <Text style={styles.userNameTitle}>Assigned Date</Text>
-                                        <Text style={styles.valuePopup}>20 Aug, 2025</Text>
+                                        <Text style={styles.valuePopup}>{caseDetails?.Assign?.AssignedOn || 'N/A'}</Text>
                                     </View>
 
 
-                                    <View style={{ marginVertical: 10 }}>
+                                    {/* <View style={{ marginVertical: 10 }}>
                                         <Text style={styles.userNameTitle}>Deadline</Text>
                                         <Text style={styles.valuePopup}>31 Aug, 2025</Text>
-                                    </View>
+                                    </View> */}
 
 
-                                    <View style={{ marginVertical: 10 }}>
-                                        <Text style={styles.userNameTitle}>Documents</Text>
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <Image
-                                                source={require('../asset/aadhar.png')}
-                                                style={styles.popupDocument}
-                                            />
 
-                                            <Image
-                                                source={require('../asset/Pan.png')}
-                                                style={styles.popupDocument}
-                                            />
-                                        </View>
-                                    </View>
 
                                     <TouchableOpacity style={[{ width: '100%' }, styles.continueButton]} onPress={() => {
                                         setModalVisible(false);
@@ -368,8 +628,10 @@ const DashboardScreen = () => {
 
                                 <TouchableOpacity style={[{ width: '80%' }, styles.continueButton]} onPress={() => {
 
-                                    setVerificationModalVisible(false);
-                                    navigation.navigate('VerificationForm');
+
+
+                                    sendLocationData(caseDetails?.Candidate?.CandidateID, caseDetails?.Candidate?.FULLNAME,caseDetails?.Address?.AddressLine1,caseDetails?.Candidate?.MobileNumber,caseDetails?.AddressConfirmation?.Latitude,
+                                                            caseDetails?.AddressConfirmation?.Longitude)
                                 }}>
                                     <Text style={styles.continueText}>Start Verification</Text>
                                 </TouchableOpacity>
@@ -570,7 +832,7 @@ const styles = StyleSheet.create({
         paddingBottom: 50,
     },
     modalContainer: {
-        height: '85%',
+        height: '88%',
         backgroundColor: '#fff',
         borderRadius: 30,
         width: '92%',
@@ -626,6 +888,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#ECF7FF',
         width: '100%',
         alignItems: 'center',
+        justifyContent: 'space-between'
     },
     userNameTitle: {
         color: "#000000ff",
@@ -719,6 +982,25 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
         marginVertical: 20,
         justifyContent: 'center'
+    },
+    addrequestButton: {
+        flexDirection: 'row',
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#b6afafff',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        alignItems: 'center',
+        backgroundColor: '#006699',
+    },
+    viewMapButton: {
+        flexDirection: 'row',
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#b6afafff',
+        paddingVertical: 3,
+        paddingHorizontal: 5,
+        alignItems: 'center',
     }
 
 
