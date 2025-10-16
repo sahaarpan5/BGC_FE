@@ -36,6 +36,8 @@ const DashboardScreen = () => {
     const [address, setAddress] = useState('Fetching address......');
     const defaultLat = 10.10;
     const defaultLng = 10.10;
+    const [searchText, setSearchText] = useState('');
+    const [menuVisible, setMenuVisible] = useState(false);
 
     const [coords, setCoords] = useState({
         latitude: defaultLat,
@@ -142,16 +144,13 @@ const DashboardScreen = () => {
                     },
                     (error) => {
                         console.warn('❌ Error getting location:', error);
-                        Alert.alert(
-                            'Location Error',
-                            'Unable to fetch your location. Please enable GPS and try again.'
-                        );
+                        
                         setAddress('Unable to get location');
                         setLoading(false);
                     },
                     {
                         enableHighAccuracy: false,
-                        timeout: 100000,
+                        timeout: 10000,
                         maximumAge: 10000,
                     }
                 );
@@ -245,7 +244,7 @@ const DashboardScreen = () => {
     };
 
 
-    const sendLocationData = async (candidateID, candidateName,address,contactNumber,lat,lng) => {
+    const sendLocationData = async (candidateID, candidateName, address, contactNumber, lat, lng) => {
         setLoading(true);
         setVerificationModalVisible(false);
 
@@ -282,9 +281,9 @@ const DashboardScreen = () => {
                     candidateId: candidateID,
                     candidateName: candidateName,
                     address: address,
-                     contactNumber: contactNumber,
-                     latt:lat,
-                     lng:lng
+                    contactNumber: contactNumber,
+                    latt: lat,
+                    lng: lng
                 });
                 console.log('✅ Success! Data saved.');
             } else {
@@ -367,6 +366,11 @@ const DashboardScreen = () => {
         </View>
     );
 
+
+    const filteredList = caseList.filter((item) =>
+        item.name?.toLowerCase().includes(searchText.toLowerCase())
+    );
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#E8151582' }}>
             <View style={styles.container}>
@@ -383,7 +387,7 @@ const DashboardScreen = () => {
                     <View >
                         <Text style={styles.welcome}>Welcome</Text>
                         <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
-                            <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', right: 40 }}>
+                            <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', right: 40 }}  onPress={() => setMenuVisible(true)}>
                                 <Image source={require('../asset/side-navigation-icon.png')} style={{ width: 40, height: 40, marginRight: 25 }}></Image>
                                 {profilePic ? (
                                     <Image
@@ -409,11 +413,13 @@ const DashboardScreen = () => {
                     <View style={styles.form}>
                         <View style={styles.searchContainer}>
                             <Image source={require('../asset/search-icon.png')} style={styles.searchIcon}></Image>
-                            <TextInput style={styles.searchInput} placeholder="Search by text" />
+                            <TextInput style={styles.searchInput} placeholder="Search by candidate name"
+                                value={searchText}
+                                onChangeText={(text) => setSearchText(text)} />
                         </View>
 
                         <FlatList
-                            data={caseList}
+                            data={filteredList}
                             keyExtractor={(item) => item.id}
                             renderItem={renderItem}
                             contentContainerStyle={{ paddingBottom: 20 }}
@@ -630,8 +636,8 @@ const DashboardScreen = () => {
 
 
 
-                                    sendLocationData(caseDetails?.Candidate?.CandidateID, caseDetails?.Candidate?.FULLNAME,caseDetails?.Address?.AddressLine1,caseDetails?.Candidate?.MobileNumber,caseDetails?.AddressConfirmation?.Latitude,
-                                                            caseDetails?.AddressConfirmation?.Longitude)
+                                    sendLocationData(caseDetails?.Candidate?.CandidateID, caseDetails?.Candidate?.FULLNAME, caseDetails?.Address?.AddressLine1, caseDetails?.Candidate?.MobileNumber, caseDetails?.AddressConfirmation?.Latitude,
+                                        caseDetails?.AddressConfirmation?.Longitude)
                                 }}>
                                     <Text style={styles.continueText}>Start Verification</Text>
                                 </TouchableOpacity>
@@ -651,6 +657,38 @@ const DashboardScreen = () => {
 
                             </View>
                         </View>
+                    </Modal>
+
+
+                    <Modal visible={menuVisible} transparent animationType="slide">
+                        <TouchableOpacity
+                            style={styles.sideMenuOverlay}
+                            activeOpacity={1}
+                            onPressOut={() => setMenuVisible(false)}
+                        >
+                            <View style={styles.sideMenuContainer}>
+                                <View style={styles.sideMenuHeader}>
+                                    {profilePic ? (
+                                        <Image source={{ uri: profilePic }} style={styles.sideMenuProfilePic} />
+                                    ) : (
+                                        <Image source={require('../asset/user-image.png')} style={styles.sideMenuProfilePic} />
+                                    )}
+                                    <Text style={styles.sideMenuUserName}>{name}</Text>
+                                </View>
+
+                                <TouchableOpacity
+                                    style={styles.sideMenuItem}
+                                    onPress={async () => {
+                                        setMenuVisible(false);
+                                        await AsyncStorage.clear();
+                                        navigation.replace('MobileLogin'); // ✅ Replace with your actual login screen name
+                                    }}
+                                >
+                                    <Image source={require('../asset/logout-icon.png')} style={styles.sideMenuIcon} />
+                                    <Text style={styles.sideMenuText}>Logout</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableOpacity>
                     </Modal>
 
 
@@ -1001,7 +1039,54 @@ const styles = StyleSheet.create({
         paddingVertical: 3,
         paddingHorizontal: 5,
         alignItems: 'center',
-    }
+    },
+    sideMenuOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+    },
+    sideMenuContainer: {
+        width: '70%',
+        backgroundColor: '#fff',
+        height: '100%',
+        paddingTop: 50,
+        paddingHorizontal: 20,
+        borderTopRightRadius: 20,
+        borderBottomRightRadius: 20,
+        elevation: 8,
+    },
+    sideMenuHeader: {
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    sideMenuProfilePic: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        marginBottom: 10,
+    },
+    sideMenuUserName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    sideMenuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 15,
+    },
+    sideMenuIcon: {
+        width: 24,
+        height: 24,
+        marginRight: 15,
+        tintColor: '#006699',
+    },
+    sideMenuText: {
+        fontSize: 16,
+        color: '#006699',
+        fontWeight: '600',
+    },
 
 
 

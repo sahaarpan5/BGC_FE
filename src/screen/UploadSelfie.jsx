@@ -121,7 +121,7 @@ const UploadSelfie = () => {
                     },
                     {
                         enableHighAccuracy: false,
-                        timeout: 100000,
+                        timeout: 10000,
                         maximumAge: 10000,
                     }
                 );
