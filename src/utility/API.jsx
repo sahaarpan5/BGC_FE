@@ -1,4 +1,8 @@
-const BASE_URL = 'http://171.16.1.150/FEWebAPI/api';
+const BASE_URL = 'https://www.geniushrtech.com/BGCFE/api';
+// http://171.16.1.150/FEWebAPI/api
+// https://www.geniushrtech.com/BGCFE/api
+
+
 
 const API = {
   LOGIN: `${BASE_URL}/token`,

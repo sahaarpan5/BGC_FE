@@ -15,6 +15,7 @@ import {
     Modal,
     Alert,
     PermissionsAndroid,
+    StatusBar,
 
 } from 'react-native';
 import API from '../utility/API';
@@ -150,7 +151,7 @@ const DashboardScreen = () => {
                     },
                     {
                         enableHighAccuracy: false,
-                        timeout: 10000,
+                        timeout: 30000,
                         maximumAge: 10000,
                     }
                 );
@@ -373,6 +374,7 @@ const DashboardScreen = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#E8151582' }}>
+            <StatusBar backgroundColor="#E8151582" barStyle="light-content" translucent={false} />
             <View style={styles.container}>
                 {loading && <Loader />}
                 {/* Header with ImageBackground */}

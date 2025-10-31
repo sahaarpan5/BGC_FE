@@ -16,6 +16,8 @@ import {
     Alert,
     Button,
     PanResponder,
+    KeyboardAvoidingView,
+    StatusBar,
 
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -30,8 +32,8 @@ import { Loader } from '../utility/Loader';
 const VerificationForm = () => {
     const navigation = useNavigation();
     const [addressModalVisible, setAddressModalVisible] = useState(false);
-    
-    
+
+
     const [selectedAddressType, setSelectedAddressType] = useState("Please Select");
 
     const [residanceModalVisible, setResidanceModalVisible] = useState(false);
@@ -44,10 +46,10 @@ const VerificationForm = () => {
     const [periodOfStayTo, setPeriodOfStayTo] = useState('');
 
     const [policeStation, setPoliceStation] = useState('');
-    
-    
-    
-    
+
+
+
+
     const [realtionShip, setRealtionShip] = useState('Self');
     const [loading, setLoading] = useState(false);
 
@@ -61,15 +63,15 @@ const VerificationForm = () => {
     const finalFile = null;
 
     const route = useRoute();
-    const { candidateId, candidateName: routeCandidateName ,address:routeAddress,contactNumber:routeContactNumber,latt:routLatt,lng:routeLng } = route.params || {};
+    const { candidateId, candidateName: routeCandidateName, address: routeAddress, contactNumber: routeContactNumber, latt: routLatt, lng: routeLng } = route.params || {};
     const [candidateName, setCandidateName] = useState(routeCandidateName || '');
     const [verifierName, setVerifierName] = useState(routeCandidateName || '');
-    const [address, setAddress] =useState(routeAddress || '');
+    const [address, setAddress] = useState(routeAddress || '');
     const [verifierAddress, setVerifierAddress] = useState(routeAddress || '');
-    const [canCont, setCanCont] =  useState(routeContactNumber || '');
-     const [verifierCont, setVerifierCont] =  useState(routeContactNumber || '');
-     console.log('laatitue',routLatt);
-     console.log('Longitude',routeLng);
+    const [canCont, setCanCont] = useState(routeContactNumber || '');
+    const [verifierCont, setVerifierCont] = useState(routeContactNumber || '');
+    console.log('laatitue', routLatt);
+    console.log('Longitude', routeLng);
 
 
     const formatDate = (date) => {
@@ -119,8 +121,8 @@ const VerificationForm = () => {
 
         try {
             const token = await AsyncStorage.getItem('access_token');
-            console.log('token',token);
-            console.log('candidateID',candidateId);
+            console.log('token', token);
+            console.log('candidateID', candidateId);
 
             const validationError = validateForm();
             if (validationError) {
@@ -176,12 +178,12 @@ const VerificationForm = () => {
                 await AsyncStorage.setItem('feedbackId', feedbackId);
                 await AsyncStorage.setItem('autoInID', autoInID);
                 Alert.alert('Success', 'Data saved successfully!');
-                navigation.replace('VerfifcationDocument',{
+                navigation.replace('VerfifcationDocument', {
                     feedbackId: feedbackId,
                     autoInID: autoInID,
-                    candidateId:candidateId,
-                    latt:routLatt,
-                    lng:routeLng
+                    candidateId: candidateId,
+                    latt: routLatt,
+                    lng: routeLng
                 });
             } else {
                 Alert.alert('Error', responseMessage || 'Something went wrong!');
@@ -202,287 +204,297 @@ const VerificationForm = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#006699' }}>
+            <StatusBar backgroundColor="#006699" barStyle="light-content" translucent={false} />
             <View style={styles.container}>
-                  {loading && <Loader />}
-                <View style={styles.toolBar}>
-                    <Text style={styles.toolbarText}>
-                        Verification Form
-                    </Text>
-                </View>
-                <Text style={styles.headerTitle}>Fill the following details</Text>
-                <ScrollView style={styles.mainContainer}>
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
+                {loading && <Loader />}
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1 }}
+                >
+                    <View style={{ flex: 1 }}>
 
-                            <Text style={styles.title}>Candidate Name</Text>
+                        <View style={styles.toolBar}>
+                            <Text style={styles.toolbarText}>
+                                Verification Form
+                            </Text>
                         </View>
-                        <View style={styles.inputBox}>
-                            <TextInput style={styles.inputText}
-                                value={candidateName}
-                                onChangeText={setCandidateName}></TextInput>
-                        </View>
-                    </View>
+                        <Text style={styles.headerTitle}>Fill the following details</Text>
+                        <ScrollView style={styles.mainContainer}>
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
 
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
-
-                            <Text style={styles.title}>Full Address</Text>
-                        </View>
-                        <View style={[styles.inputBox, { height: 100 }]}>
-                            <TextInput
-                                style={styles.inputText}
-                                multiline
-                                value={address}
-                                onChangeText={setAddress}></TextInput>
-                        </View>
-                    </View>
-
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
-
-                            <Text style={styles.title}>Address Type</Text>
-                        </View>
-                        <TouchableOpacity style={[styles.inputBox]} onPress={() => setAddressModalVisible(true)}>
-                            <Text style={[styles.inputText, { padding: 10 }]} >{selectedAddressType}</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
-
-                            <Text style={styles.title}>Type of Residence</Text>
-                        </View>
-                        <TouchableOpacity style={[styles.inputBox]} onPress={() => setResidanceModalVisible(true)}>
-                            <Text style={[styles.inputText, { padding: 10 }]} >{selectedResidanceType}</Text>
-                        </TouchableOpacity>
-                    </View>
-
-
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
-
-                            <Text style={styles.title}>Period of Stay</Text>
-                        </View>
-                        <View style={{ flexDirection: 'row' }}>
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.title}>Form</Text>
-                                <TouchableOpacity style={[styles.inputBox, { marginTop: 5 }]} onPress={() => setShowPicker(true)}
-                                    activeOpacity={0.7}>
-                                    <Text style={[styles.inputText, { margin: 10 }]}>
-                                        {periodOfStay || 'Select Date'}
-                                    </Text>
-                                </TouchableOpacity>
-                                {showPicker && (
-                                    <DateTimePicker
-                                        value={new Date()}
-                                        mode="date"
-                                        display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                                        onChange={handleDateChange}
-                                    />
-                                )}
+                                    <Text style={styles.title}>Candidate Name</Text>
+                                </View>
+                                <View style={styles.inputBox}>
+                                    <TextInput style={styles.inputText}
+                                        value={candidateName}
+                                        onChangeText={setCandidateName}></TextInput>
+                                </View>
                             </View>
 
-                            <View style={{ flex: 1, marginLeft: 10 }}>
-                                <Text style={styles.title}>To</Text>
-                                <TouchableOpacity style={[styles.inputBox, { marginTop: 5 }]} onPress={() => setShowPickerTo(true)}
-                                    activeOpacity={0.7}>
-                                    <Text style={[styles.inputText, { padding: 10 }]} > {periodOfStayTo || 'Select Date'}</Text>
-                                </TouchableOpacity>
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
 
-                                {showPickerTo && (
-                                    <DateTimePicker
-                                        value={new Date()}
-                                        mode="date"
-                                        display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                                        onChange={handleDateChangeToDate}
-                                    />
-                                )}
+                                    <Text style={styles.title}>Full Address</Text>
+                                </View>
+                                <View style={[styles.inputBox, { height: 100 }]}>
+                                    <TextInput
+                                        style={styles.inputText}
+                                        multiline
+                                        value={address}
+                                        onChangeText={setAddress}></TextInput>
+                                </View>
                             </View>
-                        </View>
 
-                    </View>
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
 
+                                    <Text style={styles.title}>Address Type</Text>
+                                </View>
+                                <TouchableOpacity style={[styles.inputBox]} onPress={() => setAddressModalVisible(true)}>
+                                    <Text style={[styles.inputText, { padding: 10 }]} >{selectedAddressType}</Text>
+                                </TouchableOpacity>
+                            </View>
 
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
 
-                            <Text style={styles.title}>Police Station</Text>
-                        </View>
-                        <View style={styles.inputBox}>
-                            <TextInput style={styles.inputText}
-                                value={policeStation}
-                                onChangeText={setPoliceStation}></TextInput>
-                        </View>
-                    </View>
-
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
-
-                            <Text style={styles.title}>Candidate Contact Number</Text>
-                        </View>
-                        <View style={styles.inputBox}>
-                            <TextInput style={styles.inputText}
-                                keyboardType="phone-pad"
-                                value={canCont}
-                                onChangeText={setCanCont}></TextInput>
-                        </View>
-                    </View>
+                                    <Text style={styles.title}>Type of Residence</Text>
+                                </View>
+                                <TouchableOpacity style={[styles.inputBox]} onPress={() => setResidanceModalVisible(true)}>
+                                    <Text style={[styles.inputText, { padding: 10 }]} >{selectedResidanceType}</Text>
+                                </TouchableOpacity>
+                            </View>
 
 
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
 
-                            <Text style={styles.title}>Verifier Name</Text>
-                        </View>
-                        <View style={styles.inputBox}>
-                            <TextInput style={styles.inputText}
-                                value={verifierName}
-                                onChangeText={setVerifierName}></TextInput>
-                        </View>
-                    </View>
+                                    <Text style={styles.title}>Period of Stay</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.title}>Form</Text>
+                                        <TouchableOpacity style={[styles.inputBox, { marginTop: 5 }]} onPress={() => setShowPicker(true)}
+                                            activeOpacity={0.7}>
+                                            <Text style={[styles.inputText, { margin: 10 }]}>
+                                                {periodOfStay || 'Select Date'}
+                                            </Text>
+                                        </TouchableOpacity>
+                                        {showPicker && (
+                                            <DateTimePicker
+                                                value={new Date()}
+                                                mode="date"
+                                                display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                                                onChange={handleDateChange}
+                                            />
+                                        )}
+                                    </View>
 
+                                    <View style={{ flex: 1, marginLeft: 10 }}>
+                                        <Text style={styles.title}>To</Text>
+                                        <TouchableOpacity style={[styles.inputBox, { marginTop: 5 }]} onPress={() => setShowPickerTo(true)}
+                                            activeOpacity={0.7}>
+                                            <Text style={[styles.inputText, { padding: 10 }]} > {periodOfStayTo || 'Select Date'}</Text>
+                                        </TouchableOpacity>
 
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
+                                        {showPickerTo && (
+                                            <DateTimePicker
+                                                value={new Date()}
+                                                mode="date"
+                                                display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                                                onChange={handleDateChangeToDate}
+                                            />
+                                        )}
+                                    </View>
+                                </View>
 
-                            <Text style={styles.title}>Verifier Address</Text>
-                        </View>
-                        <View style={[styles.inputBox, { height: 100 }]}>
-                            <TextInput style={styles.inputText}
-                                multiline
-                                value={verifierAddress}
-                                onChangeText={setVerifierAddress} ></TextInput>
-                        </View>
-                    </View>
-
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
-
-                            <Text style={styles.title}>Verifier Contact Number</Text>
-                        </View>
-                        <View style={styles.inputBox}>
-                            <TextInput style={styles.inputText}
-                                keyboardType="phone-pad"
-                                value={verifierCont}
-                                onChangeText={setVerifierCont}></TextInput>
-                        </View>
-                    </View>
-
-                    <View style={styles.childraw}>
-                        <View style={styles.raw}>
-
-                            <Text style={styles.title}>Relationship With Candidate</Text>
-                        </View>
-                        <View style={styles.inputBox}>
-                            <TextInput style={styles.inputText}
-                                value={realtionShip}
-                                onChangeText={setRealtionShip}></TextInput>
-                        </View>
-                    </View>
-                    {/* onPress={() => navigation.replace('VerfifcationDocument')} */}
-                    <TouchableOpacity style={styles.detailsButton} onPress={handleSaveAndNext}>
-                        <Text style={styles.detailsText}>Save & Next</Text>
-                    </TouchableOpacity>
-
-                    <View style={{ height: 40 }}></View>
+                            </View>
 
 
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
+
+                                    <Text style={styles.title}>Police Station</Text>
+                                </View>
+                                <View style={styles.inputBox}>
+                                    <TextInput style={styles.inputText}
+                                        value={policeStation}
+                                        onChangeText={setPoliceStation}></TextInput>
+                                </View>
+                            </View>
+
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
+
+                                    <Text style={styles.title}>Candidate Contact Number</Text>
+                                </View>
+                                <View style={styles.inputBox}>
+                                    <TextInput style={styles.inputText}
+                                        keyboardType="phone-pad"
+                                        value={canCont}
+                                        onChangeText={setCanCont}></TextInput>
+                                </View>
+                            </View>
 
 
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
 
-                </ScrollView>
+                                    <Text style={styles.title}>Verifier Name</Text>
+                                </View>
+                                <View style={styles.inputBox}>
+                                    <TextInput style={styles.inputText}
+                                        value={verifierName}
+                                        onChangeText={setVerifierName}></TextInput>
+                                </View>
+                            </View>
 
-                <Modal
-                    transparent={true}
-                    visible={addressModalVisible}
-                    animationType="fade"
-                    onRequestClose={() => setAddressModalVisible(false)}
-                >
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalContainer}>
-                            <Text style={styles.modalTitle}>Select Address Type</Text>
 
-                            <TouchableOpacity
-                                style={styles.modalOption}
-                                onPress={() => {
-                                    setSelectedAddressType("Present Address");
-                                    setAddressModalVisible(false);
-                                }}
-                            >
-                                <Text style={styles.modalOptionText}>Present Address</Text>
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
+
+                                    <Text style={styles.title}>Verifier Address</Text>
+                                </View>
+                                <View style={[styles.inputBox, { height: 100 }]}>
+                                    <TextInput style={styles.inputText}
+                                        multiline
+                                        value={verifierAddress}
+                                        onChangeText={setVerifierAddress} ></TextInput>
+                                </View>
+                            </View>
+
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
+
+                                    <Text style={styles.title}>Verifier Contact Number</Text>
+                                </View>
+                                <View style={styles.inputBox}>
+                                    <TextInput style={styles.inputText}
+                                        keyboardType="phone-pad"
+                                        value={verifierCont}
+                                        onChangeText={setVerifierCont}></TextInput>
+                                </View>
+                            </View>
+
+                            <View style={styles.childraw}>
+                                <View style={styles.raw}>
+
+                                    <Text style={styles.title}>Relationship With Candidate</Text>
+                                </View>
+                                <View style={styles.inputBox}>
+                                    <TextInput style={styles.inputText}
+                                        value={realtionShip}
+                                        onChangeText={setRealtionShip}></TextInput>
+                                </View>
+                            </View>
+                            {/* onPress={() => navigation.replace('VerfifcationDocument')} */}
+                            <TouchableOpacity style={styles.detailsButton} onPress={handleSaveAndNext}>
+                                <Text style={styles.detailsText}>Save & Next</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity
-                                style={styles.modalOption}
-                                onPress={() => {
-                                    setSelectedAddressType("Permanent Address");
-                                    setAddressModalVisible(false);
-                                }}
-                            >
-                                <Text style={styles.modalOptionText}>Permanent Address</Text>
-                            </TouchableOpacity>
+                            <View style={{ height: 40 }}></View>
 
-                            <TouchableOpacity
-                                onPress={() => setAddressModalVisible(false)}
-                                style={styles.modalCancel}
-                            >
-                                <Text style={styles.modalCancelText}>Cancel</Text>
-                            </TouchableOpacity>
-                        </View>
+
+
+
+
+                        </ScrollView>
+
+                        <Modal
+                            transparent={true}
+                            visible={addressModalVisible}
+                            animationType="fade"
+                            onRequestClose={() => setAddressModalVisible(false)}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContainer}>
+                                    <Text style={styles.modalTitle}>Select Address Type</Text>
+
+                                    <TouchableOpacity
+                                        style={styles.modalOption}
+                                        onPress={() => {
+                                            setSelectedAddressType("Present Address");
+                                            setAddressModalVisible(false);
+                                        }}
+                                    >
+                                        <Text style={styles.modalOptionText}>Present Address</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.modalOption}
+                                        onPress={() => {
+                                            setSelectedAddressType("Permanent Address");
+                                            setAddressModalVisible(false);
+                                        }}
+                                    >
+                                        <Text style={styles.modalOptionText}>Permanent Address</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={() => setAddressModalVisible(false)}
+                                        style={styles.modalCancel}
+                                    >
+                                        <Text style={styles.modalCancelText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
+
+
+
+                        <Modal
+                            transparent={true}
+                            visible={residanceModalVisible}
+                            animationType="fade"
+                            onRequestClose={() => setResidanceModalVisible(false)}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContainer}>
+                                    <Text style={styles.modalTitle}>Select Residance Type</Text>
+
+                                    <TouchableOpacity
+                                        style={styles.modalOption}
+                                        onPress={() => {
+                                            setSelectedResidanceType("Own");
+                                            setResidanceModalVisible(false);
+                                        }}
+                                    >
+                                        <Text style={styles.modalOptionText}>Own</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.modalOption}
+                                        onPress={() => {
+                                            setSelectedResidanceType("Rented");
+                                            setResidanceModalVisible(false);
+                                        }}
+                                    >
+                                        <Text style={styles.modalOptionText}>Rented</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.modalOption}
+                                        onPress={() => {
+                                            setSelectedResidanceType("PG");
+                                            setResidanceModalVisible(false);
+                                        }}
+                                    >
+                                        <Text style={styles.modalOptionText}>PG</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={() => setAddressModalVisible(false)}
+                                        style={styles.modalCancel}
+                                    >
+                                        <Text style={styles.modalCancelText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
                     </View>
-                </Modal>
+                </KeyboardAvoidingView>
 
-
-
-                <Modal
-                    transparent={true}
-                    visible={residanceModalVisible}
-                    animationType="fade"
-                    onRequestClose={() => setResidanceModalVisible(false)}
-                >
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalContainer}>
-                            <Text style={styles.modalTitle}>Select Residance Type</Text>
-
-                            <TouchableOpacity
-                                style={styles.modalOption}
-                                onPress={() => {
-                                    setSelectedResidanceType("Own");
-                                    setResidanceModalVisible(false);
-                                }}
-                            >
-                                <Text style={styles.modalOptionText}>Own</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.modalOption}
-                                onPress={() => {
-                                    setSelectedResidanceType("Rented");
-                                    setResidanceModalVisible(false);
-                                }}
-                            >
-                                <Text style={styles.modalOptionText}>Rented</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.modalOption}
-                                onPress={() => {
-                                    setSelectedResidanceType("PG");
-                                    setResidanceModalVisible(false);
-                                }}
-                            >
-                                <Text style={styles.modalOptionText}>PG</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => setAddressModalVisible(false)}
-                                style={styles.modalCancel}
-                            >
-                                <Text style={styles.modalCancelText}>Cancel</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </Modal>
 
 
 
@@ -504,7 +516,8 @@ const styles = StyleSheet.create({
         width: '100%',
         backgroundColor: '#006699',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginTop:40
     },
     toolbarText: {
         color: '#FFFFFF',

@@ -15,6 +15,7 @@ import {
     ScrollView,
     PermissionsAndroid,
     Alert,
+    StatusBar,
 
 } from 'react-native';
 import axios from 'axios';
@@ -193,6 +194,7 @@ const UploadSelfie = () => {
             const id = await AsyncStorage.getItem('UserId');
             console.log('token', token);
             console.log('candidateID', routeCandidateId);
+            console.log('Lat', coords.latitude.toString());
 
 
 
@@ -227,7 +229,7 @@ const UploadSelfie = () => {
             const { responseData, responseText, responseStatus } = response.data;
 
             if (responseStatus) {
-                Alert.alert('Success',  'Form has been uploaded successfully!');
+                Alert.alert('Success', 'Form has been uploaded successfully!');
                 navigation.replace('DashboardScreen')
 
             } else {
@@ -247,6 +249,7 @@ const UploadSelfie = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#006699' }}>
+            <StatusBar backgroundColor="#006699" barStyle="light-content" translucent={false} />
             {loading && <Loader />}
             <View style={styles.container}>
                 <View style={styles.toolBar}>
@@ -319,7 +322,8 @@ const styles = StyleSheet.create({
         width: '100%',
         backgroundColor: '#006699',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginTop: 40
     },
     toolbarText: {
         color: '#FFFFFF',

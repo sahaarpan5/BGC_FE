@@ -15,6 +15,7 @@ import {
     ScrollView,
     PermissionsAndroid,
     Alert,
+    StatusBar,
 
 } from 'react-native';
 import { launchCamera } from 'react-native-image-picker';
@@ -43,10 +44,10 @@ const VerfifcationDocument = () => {
     const [houeOneUploadedID, setHoueOneUploadedID] = useState('');
     const [houeTwoUploadedID, setHoueTwoUploadedID] = useState('');
     const [addressProofUploadedID, setAddressProofUploadedID] = useState('');
-    const { latt:routLatt,lng:routeLng } = route.params || {};
+    const { latt: routLatt, lng: routeLng } = route.params || {};
 
-     console.log('laatitue',routLatt);
-     console.log('Longitude',routeLng);
+    console.log('laatitue', routLatt);
+    console.log('Longitude', routeLng);
 
 
 
@@ -261,14 +262,14 @@ const VerfifcationDocument = () => {
         }
 
 
-        
 
-        navigation.replace('UploadSelfie',{
-                    
-                    candidateId:candidateId,
-                    latt:routLatt,
-                    lng:routeLng
-                });
+
+        navigation.replace('UploadSelfie', {
+
+            candidateId: candidateId,
+            latt: routLatt,
+            lng: routeLng
+        });
 
 
 
@@ -341,6 +342,7 @@ const VerfifcationDocument = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#006699' }}>
+            <StatusBar backgroundColor="#006699" barStyle="light-content" translucent={false} />
             {loading && <Loader />}
             <View style={styles.container}>
                 <View style={styles.toolBar}>
@@ -530,7 +532,8 @@ const styles = StyleSheet.create({
         width: '100%',
         backgroundColor: '#006699',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginTop: 40
     },
     toolbarText: {
         color: '#FFFFFF',
