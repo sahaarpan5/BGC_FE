@@ -223,7 +223,10 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Candidate Name</Text>
+                                    <Text style={styles.title}>Candidate Name
+                                          <Text style={styles.mandatory}> *</Text>
+                                        
+                                    </Text>
                                 </View>
                                 <View style={styles.inputBox}>
                                     <TextInput style={styles.inputText}
@@ -235,7 +238,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Full Address</Text>
+                                    <Text style={styles.title}>Full Address
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <View style={[styles.inputBox, { height: 100 }]}>
                                     <TextInput
@@ -249,7 +254,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Address Type</Text>
+                                    <Text style={styles.title}>Address Type
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <TouchableOpacity style={[styles.inputBox]} onPress={() => setAddressModalVisible(true)}>
                                     <Text style={[styles.inputText, { padding: 10 }]} >{selectedAddressType}</Text>
@@ -259,7 +266,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Type of Residence</Text>
+                                    <Text style={styles.title}>Type of Residence
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <TouchableOpacity style={[styles.inputBox]} onPress={() => setResidanceModalVisible(true)}>
                                     <Text style={[styles.inputText, { padding: 10 }]} >{selectedResidanceType}</Text>
@@ -270,7 +279,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Period of Stay</Text>
+                                    <Text style={styles.title}>Period of Stay
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <View style={{ flexDirection: 'row' }}>
                                     <View style={{ flex: 1 }}>
@@ -315,7 +326,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Police Station</Text>
+                                    <Text style={styles.title}>Police Station
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <View style={styles.inputBox}>
                                     <TextInput style={styles.inputText}
@@ -327,7 +340,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Candidate Contact Number</Text>
+                                    <Text style={styles.title}>Candidate Contact Number
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <View style={styles.inputBox}>
                                     <TextInput style={styles.inputText}
@@ -341,7 +356,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Verifier Name</Text>
+                                    <Text style={styles.title}>Verifier Name
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <View style={styles.inputBox}>
                                     <TextInput style={styles.inputText}
@@ -354,7 +371,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Verifier Address</Text>
+                                    <Text style={styles.title}>Verifier Address
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <View style={[styles.inputBox, { height: 100 }]}>
                                     <TextInput style={styles.inputText}
@@ -367,7 +386,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Verifier Contact Number</Text>
+                                    <Text style={styles.title}>Verifier Contact Number
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <View style={styles.inputBox}>
                                     <TextInput style={styles.inputText}
@@ -380,7 +401,9 @@ const VerificationForm = () => {
                             <View style={styles.childraw}>
                                 <View style={styles.raw}>
 
-                                    <Text style={styles.title}>Relationship With Candidate</Text>
+                                    <Text style={styles.title}>Relationship With Candidate
+                                        <Text style={styles.mandatory}> *</Text>
+                                    </Text>
                                 </View>
                                 <View style={styles.inputBox}>
                                     <TextInput style={styles.inputText}
@@ -634,6 +657,12 @@ const styles = StyleSheet.create({
     modalContainerforSign: { flex: 1, padding: 10 },
     signaturePad: { flex: 1, borderWidth: 1, borderColor: "#000" },
     buttonRow: { flexDirection: "row", justifyContent: "space-around", marginTop: 10 },
+
+    mandatory: {
+        color: 'red',
+        fontWeight: 'bold',
+    },
+
 
 
 

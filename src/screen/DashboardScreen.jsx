@@ -465,13 +465,22 @@ const DashboardScreen = () => {
                                         <Text style={styles.valuePopup}>{caseDetails?.Candidate?.FULLNAME || 'N/A'}</Text>
                                     </View>
 
-                                    <TouchableOpacity style={{ marginVertical: 10 }}>
+                                    <View style={{ marginVertical: 10 }}>
                                         <View style={{ flexDirection: 'row' }}>
                                             <Text style={styles.userNameTitle}>Contact Number</Text>
                                         </View>
 
-                                        <Text style={styles.valuePopup}>{caseDetails?.Candidate?.MobileNumber || 'N/A'}</Text>
-                                    </TouchableOpacity>
+                                        <TouchableOpacity style={{ flexDirection: 'row' ,alignItems:'center'}} onPress={() => openDialPad(caseDetails?.Candidate?.MobileNumber)}>
+                                            <Text style={styles.valuePopup}>{caseDetails?.Candidate?.MobileNumber || 'N/A'}</Text>
+
+                                         <Image
+                                            source={require('../asset/phone-call.png')}
+                                            style={{ height: 20, width: 20,  marginLeft: 10,marginTop:5 }}
+                                        />
+                                        </TouchableOpacity>
+
+                                        
+                                    </View>
 
                                     <TouchableOpacity style={{ marginVertical: 10 }}>
                                         <Text style={styles.userNameTitle}>Alternative Number</Text>
@@ -506,7 +515,7 @@ const DashboardScreen = () => {
                                                     style={styles.addrequestButton}
                                                 >
                                                     <Text style={[styles.userNameTitle, { color: '#fff' }]}>
-                                                        Request for GPS Coordinates
+                                                        Request for Address
                                                     </Text>
                                                 </TouchableOpacity>
                                             )}
@@ -588,15 +597,14 @@ const DashboardScreen = () => {
                                 <View style={styles.verificationStepRaw}>
 
                                     <View style={styles.roundCircle}>
-                                        <Image
-                                            source={require('../asset/from-icon.png')}
-
-                                        />
+                                        <Text style={styles.verificationStepNumber}>
+                                            1
+                                        </Text>
                                     </View>
 
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.verificationStepText}>
-                                            First, fills out the verification form
+                                            Fills out the verification form
                                         </Text>
                                     </View>
 
@@ -605,14 +613,13 @@ const DashboardScreen = () => {
 
                                 <View style={styles.verificationStepRaw}>
                                     <View style={styles.roundCircle}>
-                                        <Image
-                                            source={require('../asset/document-icon.png')}
-
-                                        />
+                                       <Text style={styles.verificationStepNumber}>
+                                            2
+                                        </Text>
                                     </View>
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.verificationStepText}>
-                                            Second, uploads supporting documents
+                                            Upload supporting documents
                                         </Text>
                                     </View>
 
@@ -620,14 +627,13 @@ const DashboardScreen = () => {
 
                                 <View style={styles.verificationStepRaw}>
                                     <View style={styles.roundCircle}>
-                                        <Image
-                                            source={require('../asset/selfie-icon.png')}
-
-                                        />
+                                        <Text style={styles.verificationStepNumber}>
+                                            3
+                                        </Text>
                                     </View>
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.verificationStepText}>
-                                            Third, captures a selfie
+                                            Capture your selfie
                                         </Text>
                                     </View>
 
@@ -1015,6 +1021,13 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         fontFamily: 'italic',
         marginLeft: 10
+    },
+    verificationStepNumber: {
+        fontSize: 16,
+        color: '#000000ff',
+        fontWeight: '700',
+        fontFamily: 'bold',
+        
     },
     verificationStepRaw: {
         flexDirection: 'row',

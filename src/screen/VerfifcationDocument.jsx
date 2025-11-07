@@ -355,11 +355,15 @@ const VerfifcationDocument = () => {
                     <View style={styles.childraw}>
                         <View style={styles.raw}>
 
-                            <Text style={styles.title}>House Image (1)</Text>
+                            <Text style={styles.title}>House Image (1)
+                                <Text style={styles.mandatory}> *</Text>
+
+                            </Text>
+                            
                         </View>
                         <View style={styles.inputBox}>
                             <TouchableOpacity style={[styles.uploadButton]} onPress={openCameraforHouseOne}>
-                                <Text style={styles.detailsText}>Browse</Text>
+                                <Text style={styles.detailsText}>Capture</Text>
                             </TouchableOpacity>
 
                             {houeOnecapturedImage && (
@@ -404,11 +408,13 @@ const VerfifcationDocument = () => {
                     <View style={styles.childraw}>
                         <View style={styles.raw}>
 
-                            <Text style={styles.title}>House Image (2)</Text>
+                            <Text style={styles.title}>House Image (2)
+                                <Text style={styles.mandatory}> *</Text>
+                            </Text>
                         </View>
                         <View style={styles.inputBox}>
                             <TouchableOpacity style={[styles.uploadButton]} onPress={openCameraforHouseTwo}>
-                                <Text style={styles.detailsText}>Browse</Text>
+                                <Text style={styles.detailsText}>Capture</Text>
                             </TouchableOpacity>
 
                             {houeTwocapturedImage && (
@@ -455,11 +461,13 @@ const VerfifcationDocument = () => {
                     <View style={styles.childraw}>
                         <View style={styles.raw}>
 
-                            <Text style={styles.title}>Candidate's Address Proof</Text>
+                            <Text style={styles.title}>Candidate's Address Proof
+                                <Text style={styles.mandatory}> *</Text>
+                            </Text>
                         </View>
                         <View style={styles.inputBox}>
                             <TouchableOpacity style={[styles.uploadButton]} onPress={openCameraforAddressProof}>
-                                <Text style={styles.detailsText}>Browse</Text>
+                                <Text style={styles.detailsText}>Capture</Text>
                             </TouchableOpacity>
                             {addressProofcapturedImage && (
                                 <>
@@ -636,6 +644,10 @@ const styles = StyleSheet.create({
         width: 100,
         marginHorizontal: 10,
         marginVertical: 10
+    },
+    mandatory: {
+        color: 'red',
+        fontWeight: 'bold',
     },
 
 
