@@ -259,44 +259,46 @@ const UploadSelfie = () => {
                 </View>
 
                 <ScrollView style={styles.mainContainer}>
-                    <View style={styles.childraw}>
+                    <Text style={styles.note}>Note: Please stay on this page while capturing or uploading selfie to avoid data loss. </Text>
 
-                        <View style={styles.inputBox}>
+                        <View style={styles.childraw}>
 
-                            <Image
-                                source={selfiecapturedImage || require('../asset/selfie.png')}
-                                style={styles.selfieImage}></Image>
+                            <View style={styles.inputBox}>
 
-                            <Text style={styles.selfieTitle}>Take a selfie!</Text>
-                            <Text style={styles.selfieText}>Make sure you are standing within 500 meters of
-                                the candidate's address.</Text>
+                                <Image
+                                    source={selfiecapturedImage || require('../asset/selfie.png')}
+                                    style={styles.selfieImage}></Image>
 
-                            <TouchableOpacity style={styles.uploadButton} onPress={openCamera}>
+                                <Text style={styles.selfieTitle}>Take a selfie!</Text>
+                                <Text style={styles.selfieText}>Make sure you are standing within 500 meters of
+                                    the candidate's address.</Text>
 
-                                <Text style={styles.detailsText}>Start Camera</Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity style={styles.uploadButton} onPress={openCamera}>
+
+                                    <Text style={styles.detailsText}>Start Camera</Text>
+                                </TouchableOpacity>
 
 
 
 
 
+                            </View>
                         </View>
-                    </View>
 
 
 
-                    {selfiecapturedImage && (
-                        <>
+                        {selfiecapturedImage && (
+                            <>
 
-                            <TouchableOpacity style={styles.detailsButton} onPress={() =>
-                                docUpload(selfiecapturedImage.uri, 'selfie.png')
-                            }>
-                                <Text style={styles.detailsText}>Save & Finish</Text>
-                            </TouchableOpacity>
-                        </>
-                    )}
+                                <TouchableOpacity style={styles.detailsButton} onPress={() =>
+                                    docUpload(selfiecapturedImage.uri, 'selfie.png')
+                                }>
+                                    <Text style={styles.detailsText}>Save & Finish</Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
 
-                    <View style={{ height: 40 }}></View>
+                        <View style={{ height: 40 }}></View>
 
 
 
@@ -427,7 +429,15 @@ const styles = StyleSheet.create({
         color: '#b9aaaaff',
         marginVertical: 10,
         textAlign: 'center'
-    }
+    },
+     note: {
+        color: '#f80000ff',
+        fontSize: 12,
+        fontWeight: '600',
+        marginBottom:10,
+        textAlign:'center'
+       
+    },
 
 
 });

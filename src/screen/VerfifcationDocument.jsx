@@ -36,15 +36,20 @@ const VerfifcationDocument = () => {
     const [houeOnecapturedImage, setHoueOnecapturedImage] = useState(null);
     const [houeTwocapturedImage, setHoueTwocapturedImage] = useState(null);
     const [addressProofcapturedImage, setaddressProofcapturedImage] = useState(null);
+    const [landMarkImage, setLandMarkImage] = useState(null);
     const [loading, setLoading] = useState(false);
     const [houeOneUploaded, setHoueOneUploaded] = useState(false);
     const [houeTwoUploaded, setHoueTwoUploaded] = useState(false);
+    const [landmarkUploaded, setLandMarkUploaded] = useState(false);
     const [addressProofUploaded, setAddressProofUploaded] = useState(false);
 
     const [houeOneUploadedID, setHoueOneUploadedID] = useState('');
     const [houeTwoUploadedID, setHoueTwoUploadedID] = useState('');
     const [addressProofUploadedID, setAddressProofUploadedID] = useState('');
+    const [landUploadedID, setLandUploadedID] = useState('');
     const { latt: routLatt, lng: routeLng } = route.params || {};
+
+    const isMounted = React.useRef(true);
 
     console.log('laatitue', routLatt);
     console.log('Longitude', routeLng);
@@ -77,6 +82,12 @@ const VerfifcationDocument = () => {
         loadParams();
     }, [route.params]);
 
+    useEffect(() => {
+        return () => {
+            isMounted.current = false; // mark as unmounted when leaving screen
+        };
+    }, []);
+
     const requestCameraPermission = async () => {
         if (Platform.OS === 'android') {
             try {
@@ -101,78 +112,121 @@ const VerfifcationDocument = () => {
     const openCameraforHouseOne = async () => {
         const hasPermission = await requestCameraPermission();
         if (!hasPermission) {
-            Alert.alert('Permission Denied', 'Camera permission is required to take a photo.');
+            Alert.alert('Permission Denied', 'Camera permission is required.');
             return;
         }
 
-        launchCamera(
-            {
-                mediaType: 'photo',
-                cameraType: 'back',
-                saveToPhotos: true,
-            },
-            (response) => {
-                if (response.didCancel) return;
-                if (response.errorCode) {
-                    console.log('Camera error:', response.errorMessage);
-                } else {
-                    const source = { uri: response.assets[0].uri };
-                    setHoueOnecapturedImage(source);
+        try {
+            launchCamera(
+                {
+                    mediaType: 'photo',
+                    cameraType: 'back',
+                    quality: 0.6,
+                    saveToPhotos: false,
+                },
+                (response) => {
+                    if (!isMounted.current) return; // avoid updating state after unmount
+                    if (response.didCancel || response.errorCode) return;
+                    if (response.assets && response.assets[0]?.uri) {
+                        setHoueOnecapturedImage({ uri: response.assets[0].uri });
+                    }
                 }
-            }
-        );
+            );
+        } catch (error) {
+            console.error('Camera crash:', error);
+            Alert.alert('Camera Error', 'Something went wrong. Please reopen the app and try again.');
+        }
     };
 
 
     const openCameraforHouseTwo = async () => {
         const hasPermission = await requestCameraPermission();
         if (!hasPermission) {
-            Alert.alert('Permission Denied', 'Camera permission is required to take a photo.');
+            Alert.alert('Permission Denied', 'Camera permission is required.');
             return;
         }
 
-        launchCamera(
-            {
-                mediaType: 'photo',
-                cameraType: 'back',
-                saveToPhotos: true,
-            },
-            (response) => {
-                if (response.didCancel) return;
-                if (response.errorCode) {
-                    console.log('Camera error:', response.errorMessage);
-                } else {
-                    const source = { uri: response.assets[0].uri };
-                    setHoueTwocapturedImage(source);
+        try {
+            launchCamera(
+                {
+                    mediaType: 'photo',
+                    cameraType: 'back',
+                    quality: 0.6,
+                    saveToPhotos: false,
+                },
+                (response) => {
+                    if (!isMounted.current) return; // avoid updating state after unmount
+                    if (response.didCancel || response.errorCode) return;
+                    if (response.assets && response.assets[0]?.uri) {
+                        setHoueTwocapturedImage({ uri: response.assets[0].uri });
+                    }
                 }
-            }
-        );
+            );
+        } catch (error) {
+            console.error('Camera crash:', error);
+            Alert.alert('Camera Error', 'Something went wrong. Please reopen the app and try again.');
+        }
     };
 
 
     const openCameraforAddressProof = async () => {
         const hasPermission = await requestCameraPermission();
         if (!hasPermission) {
-            Alert.alert('Permission Denied', 'Camera permission is required to take a photo.');
+            Alert.alert('Permission Denied', 'Camera permission is required.');
             return;
         }
 
-        launchCamera(
-            {
-                mediaType: 'photo',
-                cameraType: 'back',
-                saveToPhotos: true,
-            },
-            (response) => {
-                if (response.didCancel) return;
-                if (response.errorCode) {
-                    console.log('Camera error:', response.errorMessage);
-                } else {
-                    const source = { uri: response.assets[0].uri };
-                    setaddressProofcapturedImage(source);
+        try {
+            launchCamera(
+                {
+                    mediaType: 'photo',
+                    cameraType: 'back',
+                    quality: 0.6,
+                    saveToPhotos: false,
+                },
+                (response) => {
+                    if (!isMounted.current) return; // avoid updating state after unmount
+                    if (response.didCancel || response.errorCode) return;
+                    if (response.assets && response.assets[0]?.uri) {
+                        setaddressProofcapturedImage({ uri: response.assets[0].uri });
+                    }
                 }
-            }
-        );
+            );
+        } catch (error) {
+            console.error('Camera crash:', error);
+            Alert.alert('Camera Error', 'Something went wrong. Please reopen the app and try again.');
+        }
+    };
+
+
+
+    const openCameraforLandMark = async () => {
+        const hasPermission = await requestCameraPermission();
+        if (!hasPermission) {
+            Alert.alert('Permission Denied', 'Camera permission is required.');
+            return;
+        }
+
+        try {
+            launchCamera(
+                {
+                    mediaType: 'photo',
+                    cameraType: 'back',
+                    quality: 0.6,
+                    saveToPhotos: false,
+                },
+                (response) => {
+                    if (!isMounted.current) return; // avoid updating state after unmount
+                    if (response.didCancel || response.errorCode) return;
+                    if (response.assets && response.assets[0]?.uri) {
+                        setLandMarkImage({ uri: response.assets[0].uri });
+                    }
+                }
+            );
+        } catch (error) {
+            console.error('Camera crash:', error);
+            Alert.alert('Camera Error', 'Something went wrong. Please reopen the app and try again.');
+        }
     };
 
 
@@ -228,6 +282,9 @@ const VerfifcationDocument = () => {
                 } else if (fileName === 'AddressProof.png') {
                     setAddressProofUploaded(true);
                     setAddressProofUploadedID(responseData);
+                }else if (fileName === 'Landmark.png') {
+                    setLandMarkUploaded(true);
+                    setLandUploadedID(responseData);
                 }
             } else {
                 Alert.alert('Error', responseText || 'Upload failed!');
@@ -245,6 +302,7 @@ const VerfifcationDocument = () => {
     const validateForm = () => {
         if (!houeOneUploadedID.trim()) return 'Image of House One is required';
         if (!houeTwoUploadedID.trim()) return 'Image of House Two is required';
+         if (!landUploadedID.trim()) return 'Image of Land Mark is required';
         if (!addressProofUploadedID.trim()) return 'Image of Address Proof is required';
 
         return null;
@@ -327,6 +385,10 @@ const VerfifcationDocument = () => {
                     setAddressProofUploaded(false);
                     setAddressProofUploadedID('');
                     setaddressProofcapturedImage(null);
+                }else if (fileName === 'Landmark.png') {
+                    setLandMarkUploaded(false);
+                    setAddressProofUploadedID('');
+                    setLandMarkImage(null);
                 }
             } else {
                 Alert.alert('Error', responseText || 'Upload failed!');
@@ -352,6 +414,11 @@ const VerfifcationDocument = () => {
                 </View>
                 <Text style={styles.headerTitle}>Upload the following documents</Text>
                 <ScrollView style={styles.mainContainer}>
+
+                    <Text style={styles.note}>Note: Please stay on this page while capturing or uploading documents to avoid data loss.
+                               
+
+                            </Text>
                     <View style={styles.childraw}>
                         <View style={styles.raw}>
 
@@ -359,7 +426,7 @@ const VerfifcationDocument = () => {
                                 <Text style={styles.mandatory}> *</Text>
 
                             </Text>
-                            
+
                         </View>
                         <View style={styles.inputBox}>
                             <TouchableOpacity style={[styles.uploadButton]} onPress={openCameraforHouseOne}>
@@ -443,6 +510,59 @@ const VerfifcationDocument = () => {
 
                                             onPress={() =>
                                                 deleteDoc('HouseImageTwo.png', houeTwoUploadedID)
+                                            }>
+                                            <Image
+                                                source={require('../asset/bin.png')}
+                                                style={[{ margin: 10, height: 40, width: 40 }]}
+                                            />
+                                            <Text style={{ fontSize: 12 }}>Delete</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </>
+                            )}
+
+                        </View>
+                    </View>
+
+
+
+                    <View style={styles.childraw}>
+                        <View style={styles.raw}>
+
+                            <Text style={styles.title}>Image of Land Mark
+                                <Text style={styles.mandatory}> *</Text>
+                            </Text>
+                        </View>
+                        <View style={styles.inputBox}>
+                            <TouchableOpacity style={[styles.uploadButton]} onPress={openCameraforLandMark}>
+                                <Text style={styles.detailsText}>Capture</Text>
+                            </TouchableOpacity>
+                            {landMarkImage && (
+                                <>
+                                    <Image
+                                        source={landMarkImage}/// Replace with your fingerprint icon
+                                        style={[styles.captureImage, { marginLeft: 20 }]}
+                                    />
+
+                                    {!landmarkUploaded ? (
+                                        <TouchableOpacity
+                                            style={{ alignItems: 'center', justifyContent: 'center', margin: 10 }}
+                                            onPress={() =>
+                                                docUpload(landMarkImage.uri, 'Landmark.png')
+                                            }
+                                        >
+                                            <Image
+                                                source={require('../asset/upload.png')}
+                                                style={[{ margin: 10, height: 40, width: 40 }]}
+                                            />
+                                            <Text style={{ fontSize: 12 }}>Upload</Text>
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <TouchableOpacity
+                                            style={{ alignItems: 'center', justifyContent: 'center', margin: 10 }}
+
+                                            onPress={() =>
+                                                deleteDoc('Landmark.png', landUploadedID)
                                             }>
                                             <Image
                                                 source={require('../asset/bin.png')}
@@ -555,6 +675,15 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         letterSpacing: 1,
         marginLeft: 5
+    },
+
+     note: {
+        color: '#f80000ff',
+        fontSize: 12,
+        fontWeight: '600',
+        marginBottom:10,
+        textAlign:'center'
+       
     },
     raw: {
         flexDirection: 'row',

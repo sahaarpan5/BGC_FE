@@ -145,7 +145,7 @@ const DashboardScreen = () => {
                     },
                     (error) => {
                         console.warn('❌ Error getting location:', error);
-                        
+
                         setAddress('Unable to get location');
                         setLoading(false);
                     },
@@ -368,9 +368,13 @@ const DashboardScreen = () => {
     );
 
 
-    const filteredList = caseList.filter((item) =>
-        item.name?.toLowerCase().includes(searchText.toLowerCase())
-    );
+    const filteredList = caseList.filter((item) => {
+        const search = searchText.toLowerCase();
+        return (
+            item.name?.toLowerCase().includes(search) ||
+            item.address?.toLowerCase().includes(search)
+        );
+    });
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#E8151582' }}>
@@ -389,7 +393,7 @@ const DashboardScreen = () => {
                     <View >
                         <Text style={styles.welcome}>Welcome</Text>
                         <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
-                            <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', right: 40 }}  onPress={() => setMenuVisible(true)}>
+                            <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', right: 40 }} onPress={() => setMenuVisible(true)}>
                                 <Image source={require('../asset/side-navigation-icon.png')} style={{ width: 40, height: 40, marginRight: 25 }}></Image>
                                 {profilePic ? (
                                     <Image
@@ -415,7 +419,7 @@ const DashboardScreen = () => {
                     <View style={styles.form}>
                         <View style={styles.searchContainer}>
                             <Image source={require('../asset/search-icon.png')} style={styles.searchIcon}></Image>
-                            <TextInput style={styles.searchInput} placeholder="Search by candidate name"
+                            <TextInput style={styles.searchInput} placeholder="Search by name or address"
                                 value={searchText}
                                 onChangeText={(text) => setSearchText(text)} />
                         </View>
@@ -470,16 +474,16 @@ const DashboardScreen = () => {
                                             <Text style={styles.userNameTitle}>Contact Number</Text>
                                         </View>
 
-                                        <TouchableOpacity style={{ flexDirection: 'row' ,alignItems:'center'}} onPress={() => openDialPad(caseDetails?.Candidate?.MobileNumber)}>
+                                        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => openDialPad(caseDetails?.Candidate?.MobileNumber)}>
                                             <Text style={styles.valuePopup}>{caseDetails?.Candidate?.MobileNumber || 'N/A'}</Text>
 
-                                         <Image
-                                            source={require('../asset/phone-call.png')}
-                                            style={{ height: 20, width: 20,  marginLeft: 10,marginTop:5 }}
-                                        />
+                                            <Image
+                                                source={require('../asset/phone-call.png')}
+                                                style={{ height: 20, width: 20, marginLeft: 10, marginTop: 5 }}
+                                            />
                                         </TouchableOpacity>
 
-                                        
+
                                     </View>
 
                                     <TouchableOpacity style={{ marginVertical: 10 }}>
@@ -613,7 +617,7 @@ const DashboardScreen = () => {
 
                                 <View style={styles.verificationStepRaw}>
                                     <View style={styles.roundCircle}>
-                                       <Text style={styles.verificationStepNumber}>
+                                        <Text style={styles.verificationStepNumber}>
                                             2
                                         </Text>
                                     </View>
@@ -1027,7 +1031,7 @@ const styles = StyleSheet.create({
         color: '#000000ff',
         fontWeight: '700',
         fontFamily: 'bold',
-        
+
     },
     verificationStepRaw: {
         flexDirection: 'row',
