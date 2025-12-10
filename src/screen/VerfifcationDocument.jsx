@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
     },
     detailsText: {
         color: "#fff",
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: "700",
         letterSpacing: 1,
         textAlign: 'center'

@@ -26,6 +26,7 @@ const MobileLogin = () => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!mobileNumber || !password) {
@@ -113,71 +114,86 @@ const MobileLogin = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
       {loading && <Loader />}
-      {/* Header with ImageBackground */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+
+      <ImageBackground
+        source={require('../asset/login_bg1.png')}
+        resizeMode="cover"
+        style={{ flex: 1 }}   // ✅ full screen background
       >
-        <ImageBackground
-          source={require('../asset/FELogin.png')} // 🔹 your gradient background image
-          style={styles.header}
-          resizeMode="cover"
-
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
         >
-          <View style={{ flex: 0.8 }}></View>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
 
-          <View style={styles.form}>
-            <Text style={styles.loginText}>Login with your mobile no.</Text>
-            <View style={{ flexDirection: 'row', alignContent: 'center', alignItems: 'center' }}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.countryCode}>+91</Text>
+            {/* EMPTY SPACE ABOVE (Top Image Area) */}
+            <View style={{ flex: 1 }} />
+
+            {/* FORM SECTION */}
+            <View style={styles.form}>
+              <Text style={styles.welcomeText}>Welcome to Genius Vendor App.</Text>
+              <Text style={styles.loginText}>Login with your mobile no.</Text>
+
+              <View style={{ flexDirection: 'row' }}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.countryCode}>+91</Text>
+                </View>
+                <View style={[styles.inputContainer, { flex: 1, marginLeft: 10 }]}>
+                  <TextInput
+                    placeholder="Enter mobile no."
+                    placeholderTextColor="#888"
+                    keyboardType="phone-pad"
+                    style={styles.input}
+                    value={mobileNumber}
+                    onChangeText={setMobileNumber}
+                  />
+                </View>
               </View>
-              <View style={[styles.inputContainer, { flex: 1, marginLeft: 10 }]}>
+
+              <View style={[styles.inputContainer, { flex: 1, position: 'relative' }]}>
+
+
                 <TextInput
-                  style={styles.input}
-                  placeholder="Enter mobile no."
+                  placeholder="Enter password"
                   placeholderTextColor="#888"
-                  keyboardType="phone-pad"
-                  value={mobileNumber}
-                  onChangeText={setMobileNumber}
 
-                />
-              </View>
-
-
-            </View>
-            <View style={{ flexDirection: 'row', alignContent: 'center', alignItems: 'center' }}>
-
-              <View style={[styles.inputContainer, { flex: 1 }]}>
-                <TextInput
                   style={styles.input}
-                  placeholder="Enter password."
-                  placeholderTextColor="#888"
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   value={password}
                   onChangeText={setPassword}
-
                 />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', right: 10 }}
+                >
+                  <Image
+                    source={
+                      showPassword
+                        ? require('../asset/eye_open.png')   // 👁 password visible
+                        : require('../asset/eye_close.png')  // 👁 password hidden
+                    }
+                    style={{ width: 22, height: 22 }}
+                  />
+                </TouchableOpacity>
               </View>
 
 
+
+
+              <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Login</Text>
+              </TouchableOpacity>
+
             </View>
 
-
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-              <Text style={styles.buttonText}>Login</Text>
-            </TouchableOpacity>
-          </View>
-
-
-        </ImageBackground>
-      </KeyboardAvoidingView>
-
-
-      {/* Form Section */}
-
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </ImageBackground>
     </View>
   );
 };
@@ -198,16 +214,9 @@ const styles = StyleSheet.create({
 
   form: {
     width: "100%",
-    backgroundColor: "#fff",
+
     padding: 20,
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
-    marginTop: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 5,
-    flex: 0.45
+    marginTop: 350
 
 
   },
@@ -220,6 +229,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     height: 50,
+    borderWidth: 1,
+    backgroundColor: '#FFF'
 
   },
   countryCode: {
@@ -248,9 +259,16 @@ const styles = StyleSheet.create({
   },
   loginText: {
     textAlign: 'center',
-    color: '#525B69',
+    color: '#ffffffff',
+    fontSize: 16,
+    fontWeight: '400',
+    marginBottom: 30
+  },
+  welcomeText: {
+    textAlign: 'center',
+    color: '#ffffffff',
     fontSize: 21,
-    fontWeight: '500',
+    fontWeight: '600',
     marginBottom: 30
   }
 

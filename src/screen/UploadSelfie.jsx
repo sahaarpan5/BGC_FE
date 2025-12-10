@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     },
     detailsText: {
         color: "#fff",
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: "700",
         letterSpacing: 1,
         textAlign: 'center'
@@ -404,10 +404,10 @@ const styles = StyleSheet.create({
         backgroundColor: "#EE1171",
         paddingVertical: 6,
         paddingHorizontal: 12,
-        height: 50,
+        height: 55,
         borderRadius: 4,
         justifyContent: 'center',
-        width: 150,
+        width: 180,
         marginHorizontal: 10,
         marginVertical: 30,
         top: 60
