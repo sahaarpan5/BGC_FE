@@ -16,6 +16,8 @@ import {
     Alert,
     PermissionsAndroid,
     StatusBar,
+    ScrollView,
+    KeyboardAvoidingView,
 
 } from 'react-native';
 import API from '../utility/API';
@@ -39,6 +41,9 @@ const DashboardScreen = () => {
     const defaultLng = 10.10;
     const [searchText, setSearchText] = useState('');
     const [menuVisible, setMenuVisible] = useState(false);
+    const [insuffmodalVisible, setInsuffModalVisible] = useState(false);
+    const [insuffcaseDetails, setInsuffCaseDetails] = useState(null);
+    const [insuffRemarks, setInsuffRemarks] = useState('');
 
     const [coords, setCoords] = useState({
         latitude: defaultLat,
@@ -223,6 +228,28 @@ const DashboardScreen = () => {
     };
 
 
+    const fetchCaseDetailsInsuff = async (secureId) => {
+        try {
+            setInsuffModalVisible(false);
+            setLoading(true);
+            const response = await axios.get(API.CASE_DETAILS(secureId));
+            const res = response.data;
+
+            if (res.responseStatus && res.responseData.length > 0) {
+                setInsuffCaseDetails(res.responseData[0]);
+                setInsuffModalVisible(true);
+            } else {
+                Alert.alert('No details found for this case.');
+            }
+        } catch (error) {
+            console.error('Error fetching case details:', error);
+            Alert.alert('Failed to fetch case details.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     const addressNotification = async (secureId) => {
         try {
             setModalVisible(false);
@@ -356,6 +383,10 @@ const DashboardScreen = () => {
                         <Text style={styles.detailsText}>View Details</Text>
                     </TouchableOpacity>
 
+                    <TouchableOpacity style={styles.insuffButton} onPress={() => fetchCaseDetailsInsuff(item.SecureID)}>
+                        <Text style={styles.insuffText}>Insuff</Text>
+                    </TouchableOpacity>
+
 
                 </View>
             </View>
@@ -379,176 +410,180 @@ const DashboardScreen = () => {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#E8151582' }}>
             <StatusBar backgroundColor="#E8151582" barStyle="light-content" translucent={false} />
-            <View style={styles.container}>
-                {loading && <Loader />}
-                {/* Header with ImageBackground */}
-                <ImageBackground
-                    source={require('../asset/app-bg.png')} // 🔹 your gradient background image
-                    style={styles.header}
-                    resizeMode="cover"
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+                <ScrollView style={styles.container}>
+                    {loading && <Loader />}
+                    {/* Header with ImageBackground */}
+                    <ImageBackground
+                        source={require('../asset/app-bg.png')} // 🔹 your gradient background image
+                        style={styles.header}
+                        resizeMode="cover"
 
-                >
-
-
-                    <View >
-                        <Text style={styles.welcome}>Welcome</Text>
-                        <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
-                            <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', right: 40 }} onPress={() => setMenuVisible(true)}>
-                                <Image source={require('../asset/side-navigation-icon.png')} style={{ width: 40, height: 40, marginRight: 25 }}></Image>
-                                {profilePic ? (
-                                    <Image
-                                        source={{ uri: profilePic }}
-                                        style={{ width: 50, height: 50, borderRadius: 25 }}
-                                    />
-                                ) : (
-                                    <Image
-                                        source={require('../asset/user-image.png')}
-                                        style={{ width: 50, height: 50, borderRadius: 25 }}
-                                    />
-                                )}
-                            </TouchableOpacity>
+                    >
 
 
-                            <Text style={styles.userName}>{name}</Text>
-                        </View>
-
-                    </View>
-
-
-
-                    <View style={styles.form}>
-                        <View style={styles.searchContainer}>
-                            <Image source={require('../asset/search-icon.png')} style={styles.searchIcon}></Image>
-                            <TextInput style={styles.searchInput} placeholder="Search by name or address"
-                                value={searchText}
-                                onChangeText={(text) => setSearchText(text)} />
-                        </View>
-
-                        <FlatList
-                            data={filteredList}
-                            keyExtractor={(item) => item.id}
-                            renderItem={renderItem}
-                            contentContainerStyle={{ paddingBottom: 20 }}
-                        />
-                    </View>
-
-
-                    <Modal visible={modalVisible} transparent animationType="fade">
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContainer}>
-                                <TouchableOpacity
-                                    onPress={() => setModalVisible(false)}
-                                    style={styles.closeButton}>
-                                    <View style={styles.closeCircle}>
+                        <View >
+                            <Text style={styles.welcome}>Welcome</Text>
+                            <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
+                                <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', right: 40 }} onPress={() => setMenuVisible(true)}>
+                                    <Image source={require('../asset/side-navigation-icon.png')} style={{ width: 40, height: 40, marginRight: 25 }}></Image>
+                                    {profilePic ? (
                                         <Image
-                                            source={require('../asset/cross.png')}
-                                            style={styles.closeicon}
+                                            source={{ uri: profilePic }}
+                                            style={{ width: 50, height: 50, borderRadius: 25 }}
                                         />
-                                    </View>
+                                    ) : (
+                                        <Image
+                                            source={require('../asset/user-image.png')}
+                                            style={{ width: 50, height: 50, borderRadius: 25 }}
+                                        />
+                                    )}
                                 </TouchableOpacity>
 
 
+                                <Text style={styles.userName}>{name}</Text>
+                            </View>
+
+                        </View>
 
 
-                                <View style={styles.popupheader}>
-                                    <Text style={styles.headerTitle}>Verification Details</Text>
-                                    <TouchableOpacity style={styles.addrequestButton}
-                                        onPress={() => fetchCaseDetails(caseDetails?.Candidate?.SecureID)}>
-                                        <Text style={{ fontSize: 12, color: '#FFF' }}>Refresh</Text>
-                                        <Image
-                                            source={require('../asset/refresh.png')}
-                                            style={{ height: 15, width: 15, tintColor: '#FFF', marginLeft: 5 }}
-                                        />
+
+                        <View style={styles.form}>
+                            <View style={styles.searchContainer}>
+                                <Image source={require('../asset/search-icon.png')} style={styles.searchIcon}></Image>
+                                <TextInput style={styles.searchInput} placeholder="Search by name or address"
+                                    value={searchText}
+                                    onChangeText={(text) => setSearchText(text)} />
+                            </View>
+
+                            <FlatList
+                                data={filteredList}
+                                keyExtractor={(item) => item.id}
+                                renderItem={renderItem}
+                                contentContainerStyle={{ paddingBottom: 20 }}
+                            />
+                        </View>
+
+
+                        <Modal visible={modalVisible} transparent animationType="fade">
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContainer}>
+                                    <TouchableOpacity
+                                        onPress={() => setModalVisible(false)}
+                                        style={styles.closeButton}>
+                                        <View style={styles.closeCircle}>
+                                            <Image
+                                                source={require('../asset/cross.png')}
+                                                style={styles.closeicon}
+                                            />
+                                        </View>
                                     </TouchableOpacity>
 
-                                </View>
 
-                                <View style={{ flex: 1, paddingHorizontal: 10 }}>
-                                    <View style={{ marginVertical: 5 }}>
-                                        <Text style={styles.userNameTitle}>Candidate Name</Text>
-                                        <Text style={styles.valuePopup}>{caseDetails?.Candidate?.FULLNAME || 'N/A'}</Text>
-                                    </View>
 
-                                    <View style={{ marginVertical: 10 }}>
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <Text style={styles.userNameTitle}>Contact Number</Text>
-                                        </View>
 
-                                        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => openDialPad(caseDetails?.Candidate?.MobileNumber)}>
-                                            <Text style={styles.valuePopup}>{caseDetails?.Candidate?.MobileNumber || 'N/A'}</Text>
-
+                                    <View style={styles.popupheader}>
+                                        <Text style={styles.headerTitle}>Verification Details</Text>
+                                        <TouchableOpacity style={styles.addrequestButton}
+                                            onPress={() => fetchCaseDetails(caseDetails?.Candidate?.SecureID)}>
+                                            <Text style={{ fontSize: 12, color: '#FFF' }}>Refresh</Text>
                                             <Image
-                                                source={require('../asset/phone-call.png')}
-                                                style={{ height: 20, width: 20, marginLeft: 10, marginTop: 5 }}
+                                                source={require('../asset/refresh.png')}
+                                                style={{ height: 15, width: 15, tintColor: '#FFF', marginLeft: 5 }}
                                             />
                                         </TouchableOpacity>
 
-
                                     </View>
 
-                                    <TouchableOpacity style={{ marginVertical: 10 }}>
-                                        <Text style={styles.userNameTitle}>Alternative Number</Text>
-                                        <Text style={styles.valuePopup}>{caseDetails?.Address?.AltPhone || 'N/A'}</Text>
-                                    </TouchableOpacity>
-
-                                    <View style={{ marginVertical: 10 }}>
-                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                                            <Text style={styles.userNameTitle}>Address</Text>
-
-                                            {caseDetails?.AddressConfirmation?.IsVerifiedByCandidate ? (
-                                                // ✅ Show View on Map if verified
-                                                <TouchableOpacity
-                                                    onPress={() =>
-                                                        openMap(
-                                                            caseDetails?.AddressConfirmation?.Latitude,
-                                                            caseDetails?.AddressConfirmation?.Longitude
-                                                        )
-                                                    }
-                                                    style={styles.viewMapButton}
-                                                >
-                                                    <Text style={styles.userNameTitle}>View on Map</Text>
-                                                    <Image
-                                                        source={require('../asset/google-maps.png')}
-                                                        style={{ height: 15, width: 15, marginLeft: 5 }}
-                                                    />
-                                                </TouchableOpacity>
-                                            ) : (
-                                                // ❌ Show Send Address Request if not verified
-                                                <TouchableOpacity
-                                                    onPress={() => addressNotification(caseDetails?.Candidate?.SecureID)}
-                                                    style={styles.addrequestButton}
-                                                >
-                                                    <Text style={[styles.userNameTitle, { color: '#fff' }]}>
-                                                        Request for Address
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            )}
+                                    <View style={{ flex: 1, paddingHorizontal: 10 }}>
+                                        <View style={{ marginVertical: 5 }}>
+                                            <Text style={styles.userNameTitle}>Candidate Name</Text>
+                                            <Text style={styles.valuePopup}>{caseDetails?.Candidate?.FULLNAME || 'N/A'}</Text>
                                         </View>
 
-                                        <Text style={styles.valuePopup}>
-                                            {caseDetails?.Address?.AddressLine1 || 'N/A'}
-                                        </Text>
-                                    </View>
+                                        <View style={{ marginVertical: 10 }}>
+                                            <View style={{ flexDirection: 'row' }}>
+                                                <Text style={styles.userNameTitle}>Contact Number</Text>
+                                            </View>
 
-                                    <View style={{ marginVertical: 10 }}>
-                                        <Text style={styles.userNameTitle}>Father's Name</Text>
-                                        <Text style={styles.valuePopup}>{caseDetails?.Candidate?.FatherName || 'N/A'}</Text>
-                                    </View>
+                                            <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => openDialPad(caseDetails?.Candidate?.MobileNumber)}>
+                                                <Text style={styles.valuePopup}>{caseDetails?.Candidate?.MobileNumber || 'N/A'}</Text>
 
-
-                                    <View style={{ marginVertical: 10 }}>
-                                        <Text style={styles.userNameTitle}>Company Details</Text>
-                                        <Text style={styles.valuePopup}>{caseDetails?.Candidate?.CompanyId || 'N/A'}</Text>
-                                    </View>
+                                                <Image
+                                                    source={require('../asset/phone-call.png')}
+                                                    style={{ height: 20, width: 20, marginLeft: 10, marginTop: 5 }}
+                                                />
+                                            </TouchableOpacity>
 
 
-                                    <View style={{ marginVertical: 10 }}>
-                                        <Text style={styles.userNameTitle}>Assigned Date</Text>
-                                        <Text style={styles.valuePopup}>{caseDetails?.Assign?.AssignedOn || 'N/A'}</Text>
-                                    </View>
+                                        </View>
+
+                                        <TouchableOpacity style={{ marginVertical: 10 }}>
+                                            <Text style={styles.userNameTitle}>Alternative Number</Text>
+                                            <Text style={styles.valuePopup}>{caseDetails?.Address?.AltPhone || 'N/A'}</Text>
+                                        </TouchableOpacity>
+
+                                        <View style={{ marginVertical: 10 }}>
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                                                <Text style={styles.userNameTitle}>Address</Text>
+
+                                                {caseDetails?.AddressConfirmation?.IsVerifiedByCandidate ? (
+                                                    // ✅ Show View on Map if verified
+                                                    <TouchableOpacity
+                                                        onPress={() =>
+                                                            openMap(
+                                                                caseDetails?.AddressConfirmation?.Latitude,
+                                                                caseDetails?.AddressConfirmation?.Longitude
+                                                            )
+                                                        }
+                                                        style={styles.viewMapButton}
+                                                    >
+                                                        <Text style={styles.userNameTitle}>View on Map</Text>
+                                                        <Image
+                                                            source={require('../asset/google-maps.png')}
+                                                            style={{ height: 15, width: 15, marginLeft: 5 }}
+                                                        />
+                                                    </TouchableOpacity>
+                                                ) : (
+                                                    // ❌ Show Send Address Request if not verified
+                                                    <TouchableOpacity
+                                                        onPress={() => addressNotification(caseDetails?.Candidate?.SecureID)}
+                                                        style={styles.addrequestButton}
+                                                    >
+                                                        <Text style={[styles.userNameTitle, { color: '#fff' }]}>
+                                                            Request for Address
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                )}
+                                            </View>
+
+                                            <Text style={styles.valuePopup}>
+                                                {caseDetails?.Address?.AddressLine1 || 'N/A'}
+                                            </Text>
+                                        </View>
+
+                                        <View style={{ marginVertical: 10 }}>
+                                            <Text style={styles.userNameTitle}>Father's Name</Text>
+                                            <Text style={styles.valuePopup}>{caseDetails?.Candidate?.FatherName || 'N/A'}</Text>
+                                        </View>
 
 
-                                    {/* <View style={{ marginVertical: 10 }}>
+                                        <View style={{ marginVertical: 10 }}>
+                                            <Text style={styles.userNameTitle}>Company Details</Text>
+                                            <Text style={styles.valuePopup}>{caseDetails?.Candidate?.CompanyId || 'N/A'}</Text>
+                                        </View>
+
+
+                                        <View style={{ marginVertical: 10 }}>
+                                            <Text style={styles.userNameTitle}>Assigned Date</Text>
+                                            <Text style={styles.valuePopup}>{caseDetails?.Assign?.AssignedOn || 'N/A'}</Text>
+                                        </View>
+
+
+                                        {/* <View style={{ marginVertical: 10 }}>
                                         <Text style={styles.userNameTitle}>Deadline</Text>
                                         <Text style={styles.valuePopup}>31 Aug, 2025</Text>
                                     </View> */}
@@ -556,161 +591,243 @@ const DashboardScreen = () => {
 
 
 
-                                    <TouchableOpacity style={[{ width: '100%' }, styles.continueButton]} onPress={() => {
-                                        setModalVisible(false);
-                                        setVerificationModalVisible(true);
+                                        <TouchableOpacity style={[{ width: '100%' }, styles.continueButton]} onPress={() => {
+                                            setModalVisible(false);
+                                            setVerificationModalVisible(true);
+                                        }}>
+                                            <Text style={styles.continueText}>Continue</Text>
+                                        </TouchableOpacity>
+
+
+
+                                    </View>
+
+
+
+
+
+
+
+                                </View>
+                            </View>
+                        </Modal>
+
+                        <Modal visible={verificationModalVisible} transparent animationType="fade">
+                            <View style={styles.modalOverlay}>
+                                <View style={[styles.modalContainer, { alignItems: 'center' }]}>
+                                    <TouchableOpacity
+                                        onPress={() => setVerificationModalVisible(false)}
+                                        style={styles.closeButton}>
+                                        <View style={styles.closeCircle}>
+                                            <Image
+                                                source={require('../asset/cross.png')}
+                                                style={styles.closeicon}
+                                            />
+                                        </View>
+                                    </TouchableOpacity>
+
+                                    <Image
+                                        source={require('../asset/verificationprocess-icon.png')}
+                                        style={styles.verificationProcess}
+                                    />
+                                    <Text style={styles.verificationProcessText}>
+                                        Verification Process
+                                    </Text>
+                                    <View style={styles.verificationStepRaw}>
+
+                                        <View style={styles.roundCircle}>
+                                            <Text style={styles.verificationStepNumber}>
+                                                1
+                                            </Text>
+                                        </View>
+
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.verificationStepText}>
+                                                Fills out the verification form
+                                            </Text>
+                                        </View>
+
+
+                                    </View>
+
+                                    <View style={styles.verificationStepRaw}>
+                                        <View style={styles.roundCircle}>
+                                            <Text style={styles.verificationStepNumber}>
+                                                2
+                                            </Text>
+                                        </View>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.verificationStepText}>
+                                                Upload supporting documents
+                                            </Text>
+                                        </View>
+
+                                    </View>
+
+                                    <View style={styles.verificationStepRaw}>
+                                        <View style={styles.roundCircle}>
+                                            <Text style={styles.verificationStepNumber}>
+                                                3
+                                            </Text>
+                                        </View>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.verificationStepText}>
+                                                Capture your selfie
+                                            </Text>
+                                        </View>
+
+                                    </View>
+
+
+                                    <TouchableOpacity style={[{ width: '80%' }, styles.continueButton]} onPress={() => {
+
+
+
+                                        sendLocationData(caseDetails?.Candidate?.CandidateID, caseDetails?.Candidate?.FULLNAME, caseDetails?.Address?.AddressLine1, caseDetails?.Candidate?.MobileNumber, caseDetails?.AddressConfirmation?.Latitude,
+                                            caseDetails?.AddressConfirmation?.Longitude)
                                     }}>
-                                        <Text style={styles.continueText}>Continue</Text>
+                                        <Text style={styles.continueText}>Start Verification</Text>
                                     </TouchableOpacity>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
                                 </View>
-
-
-
-
-
-
-
                             </View>
-                        </View>
-                    </Modal>
+                        </Modal>
 
-                    <Modal visible={verificationModalVisible} transparent animationType="fade">
-                        <View style={styles.modalOverlay}>
-                            <View style={[styles.modalContainer, { alignItems: 'center' }]}>
-                                <TouchableOpacity
-                                    onPress={() => setVerificationModalVisible(false)}
-                                    style={styles.closeButton}>
-                                    <View style={styles.closeCircle}>
-                                        <Image
-                                            source={require('../asset/cross.png')}
-                                            style={styles.closeicon}
-                                        />
-                                    </View>
-                                </TouchableOpacity>
 
-                                <Image
-                                    source={require('../asset/verificationprocess-icon.png')}
-                                    style={styles.verificationProcess}
-                                />
-                                <Text style={styles.verificationProcessText}>
-                                    Verification Process
-                                </Text>
-                                <View style={styles.verificationStepRaw}>
-
-                                    <View style={styles.roundCircle}>
-                                        <Text style={styles.verificationStepNumber}>
-                                            1
-                                        </Text>
+                        <Modal visible={menuVisible} transparent animationType="slide">
+                            <TouchableOpacity
+                                style={styles.sideMenuOverlay}
+                                activeOpacity={1}
+                                onPressOut={() => setMenuVisible(false)}
+                            >
+                                <View style={styles.sideMenuContainer}>
+                                    <View style={styles.sideMenuHeader}>
+                                        {profilePic ? (
+                                            <Image source={{ uri: profilePic }} style={styles.sideMenuProfilePic} />
+                                        ) : (
+                                            <Image source={require('../asset/user-image.png')} style={styles.sideMenuProfilePic} />
+                                        )}
+                                        <Text style={styles.sideMenuUserName}>{name}</Text>
                                     </View>
 
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={styles.verificationStepText}>
-                                            Fills out the verification form
-                                        </Text>
+                                    <TouchableOpacity
+                                        style={styles.sideMenuItem}
+                                        onPress={async () => {
+                                            setMenuVisible(false);
+                                            await AsyncStorage.clear();
+                                            navigation.replace('MobileLogin'); // ✅ Replace with your actual login screen name
+                                        }}
+                                    >
+                                        <Image source={require('../asset/logout-icon.png')} style={styles.sideMenuIcon} />
+                                        <Text style={styles.sideMenuText}>Logout</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </TouchableOpacity>
+                        </Modal>
+
+
+                        <Modal visible={insuffmodalVisible} transparent animationType="fade">
+                            <View style={styles.modalOverlay}>
+                                <View style={[styles.modalContainer, { height: '60%' }]}>
+                                    <TouchableOpacity
+                                        onPress={() => setInsuffModalVisible(false)}
+                                        style={styles.closeButton}>
+                                        <View style={styles.closeCircle}>
+                                            <Image
+                                                source={require('../asset/cross.png')}
+                                                style={styles.closeicon}
+                                            />
+                                        </View>
+                                    </TouchableOpacity>
+
+
+
+
+
+
+                                    <View style={{ flex: 1, paddingHorizontal: 10, marginTop: 30 }}>
+                                         <View style={{ marginVertical: 5 }}>
+                                            <Text style={[styles.valuePopup, { fontSize: 18,color:'#05103f',textAlign:'center' }]}>Manage Insufficiency</Text>
+                                           
+                                        </View>
+                                        <View style={{ marginVertical: 5 }}>
+                                            <Text style={styles.userNameTitle}>Candidate Name</Text>
+                                            <Text style={styles.valuePopup}>{insuffcaseDetails?.Candidate?.FULLNAME || 'N/A'}</Text>
+                                        </View>
+
+                                        <View style={{ marginVertical: 10 }}>
+                                            <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+                                                <Text style={styles.userNameTitle}>Insufficiency Action</Text>
+                                            </View>
+                                            <View style={{ backgroundColor: '#c0bbbb', borderRadius: 4, padding: 10 }}>
+                                                <Text style={styles.userNameTitle}>Open</Text>
+                                            </View>
+
+
+
+
+                                        </View>
+
+                                        <View style={{ marginVertical: 10 }}>
+                                            <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+                                                <Text style={styles.userNameTitle}>Remarks *</Text>
+                                            </View>
+                                            <TextInput style={styles.remaksInput} multiline placeholder="Enter remarks here..." value={insuffRemarks} onChangeText={setInsuffRemarks} />
+
+
+
+
+                                        </View>
+
+
+
+
+
+
+                                        <TouchableOpacity style={[{ width: '100%' }, styles.continueButton]} onPress={() => {
+                                            setInsuffModalVisible(false);
+
+                                        }}>
+                                            <Text style={styles.continueText}>Submit</Text>
+                                        </TouchableOpacity>
+
+
+
                                     </View>
+
+
+
+
+
 
 
                                 </View>
-
-                                <View style={styles.verificationStepRaw}>
-                                    <View style={styles.roundCircle}>
-                                        <Text style={styles.verificationStepNumber}>
-                                            2
-                                        </Text>
-                                    </View>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={styles.verificationStepText}>
-                                            Upload supporting documents
-                                        </Text>
-                                    </View>
-
-                                </View>
-
-                                <View style={styles.verificationStepRaw}>
-                                    <View style={styles.roundCircle}>
-                                        <Text style={styles.verificationStepNumber}>
-                                            3
-                                        </Text>
-                                    </View>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={styles.verificationStepText}>
-                                            Capture your selfie
-                                        </Text>
-                                    </View>
-
-                                </View>
-
-
-                                <TouchableOpacity style={[{ width: '80%' }, styles.continueButton]} onPress={() => {
-
-
-
-                                    sendLocationData(caseDetails?.Candidate?.CandidateID, caseDetails?.Candidate?.FULLNAME, caseDetails?.Address?.AddressLine1, caseDetails?.Candidate?.MobileNumber, caseDetails?.AddressConfirmation?.Latitude,
-                                        caseDetails?.AddressConfirmation?.Longitude)
-                                }}>
-                                    <Text style={styles.continueText}>Start Verification</Text>
-                                </TouchableOpacity>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                             </View>
-                        </View>
-                    </Modal>
-
-
-                    <Modal visible={menuVisible} transparent animationType="slide">
-                        <TouchableOpacity
-                            style={styles.sideMenuOverlay}
-                            activeOpacity={1}
-                            onPressOut={() => setMenuVisible(false)}
-                        >
-                            <View style={styles.sideMenuContainer}>
-                                <View style={styles.sideMenuHeader}>
-                                    {profilePic ? (
-                                        <Image source={{ uri: profilePic }} style={styles.sideMenuProfilePic} />
-                                    ) : (
-                                        <Image source={require('../asset/user-image.png')} style={styles.sideMenuProfilePic} />
-                                    )}
-                                    <Text style={styles.sideMenuUserName}>{name}</Text>
-                                </View>
-
-                                <TouchableOpacity
-                                    style={styles.sideMenuItem}
-                                    onPress={async () => {
-                                        setMenuVisible(false);
-                                        await AsyncStorage.clear();
-                                        navigation.replace('MobileLogin'); // ✅ Replace with your actual login screen name
-                                    }}
-                                >
-                                    <Image source={require('../asset/logout-icon.png')} style={styles.sideMenuIcon} />
-                                    <Text style={styles.sideMenuText}>Logout</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </TouchableOpacity>
-                    </Modal>
+                        </Modal>
 
 
 
 
-                </ImageBackground>
+                    </ImageBackground>
 
-                {/* Form Section */}
+                    {/* Form Section */}
 
-            </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+
         </SafeAreaView>
 
     );
@@ -1105,6 +1222,27 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#006699',
         fontWeight: '600',
+    },
+
+    insuffButton: {
+        borderColor: "#006699",
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 4,
+        borderWidth: 1,
+        marginLeft: 10
+    },
+    insuffText: {
+        color: "#006699",
+        fontSize: 14,
+        fontWeight: "bold",
+    },
+    remaksInput: {
+        minHeight: 80,
+        textAlignVertical: 'top', // VERY IMPORTANT for Android
+        padding: 12,
+        backgroundColor: '#F3F3F3',
+        borderRadius: 10,
     },
 
 

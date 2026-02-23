@@ -136,7 +136,7 @@ const MobileLogin = () => {
 
             {/* FORM SECTION */}
             <View style={styles.form}>
-              <Text style={styles.welcomeText}>Welcome to Genius Vendor App.</Text>
+              <Text style={styles.welcomeText}>Welcome to Genius Verify</Text>
               <Text style={styles.loginText}>Login with your mobile no.</Text>
 
               <View style={{ flexDirection: 'row' }}>
