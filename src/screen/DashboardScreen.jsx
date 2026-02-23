@@ -44,6 +44,7 @@ const DashboardScreen = () => {
     const [insuffmodalVisible, setInsuffModalVisible] = useState(false);
     const [insuffcaseDetails, setInsuffCaseDetails] = useState(null);
     const [insuffRemarks, setInsuffRemarks] = useState('');
+    const [secureID, setSecureID] = useState('');
 
     const [coords, setCoords] = useState({
         latitude: defaultLat,
@@ -57,7 +58,9 @@ const DashboardScreen = () => {
             try {
                 const storedUserName = await AsyncStorage.getItem('FullName');
                 const storedPic = await AsyncStorage.getItem('ProfilePicture');
+               
                 setName(storedUserName);
+               
 
                 if (storedPic) {
                     // Replace backslashes in the URL
@@ -340,6 +343,62 @@ const DashboardScreen = () => {
         Linking.openURL(number).catch((err) =>
             Alert.alert("Error", "Could not open dialer")
         );
+    };
+
+    const submitInsuff = async (candidateID) => {
+        if (!insuffRemarks) {
+            Alert.alert('Validation', 'Please enter Insufficiency Remarks');
+            return;
+        }
+
+         const storedSecureID = await AsyncStorage.getItem('responseText');
+          if (!storedSecureID) {
+            Alert.alert('Validation', 'Secure ID not available');
+            return;
+        }
+
+        console.log('storedSecureID', storedSecureID);
+
+        setLoading(true);
+
+
+
+        const url = API.STARTINSUFF;
+        console.log('url', url);
+
+        const payload = {
+            CandidateId: candidateID,
+            Remarks: insuffRemarks,
+            RaisedByID: storedSecureID,
+            RaisedByType: 'FE'
+        };
+
+        console.log('payload', url);
+        
+
+        try {
+            const response = await axios.post(url, payload, {
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            console.log('📡 API Response:', response.data);
+            setLoading(false);
+
+            if (response.data.responseStatus === true) {
+                fetchCases();
+                console.log('✅ Success! Data saved.');
+                 Alert.alert('Success', response.data.responseText || 'Insufficiency remarks submitted successfully.');
+            } else {
+                console.log('❌ Failed:', response.data);
+                Alert.alert('Failed', response.data.responseText || 'Failed to submit insufficiency remarks.');
+            }
+        } catch (error) {
+            setLoading(false);
+            console.error('Error sending data:', error);
+            Alert.alert('Network Error', 'Unable to connect to server.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const renderItem = ({ item, index }) => (
@@ -759,9 +818,9 @@ const DashboardScreen = () => {
 
 
                                     <View style={{ flex: 1, paddingHorizontal: 10, marginTop: 30 }}>
-                                         <View style={{ marginVertical: 5 }}>
-                                            <Text style={[styles.valuePopup, { fontSize: 18,color:'#05103f',textAlign:'center' }]}>Manage Insufficiency</Text>
-                                           
+                                        <View style={{ marginVertical: 5 }}>
+                                            <Text style={[styles.valuePopup, { fontSize: 18, color: '#05103f', textAlign: 'center' }]}>Manage Insufficiency</Text>
+
                                         </View>
                                         <View style={{ marginVertical: 5 }}>
                                             <Text style={styles.userNameTitle}>Candidate Name</Text>
@@ -799,6 +858,8 @@ const DashboardScreen = () => {
 
                                         <TouchableOpacity style={[{ width: '100%' }, styles.continueButton]} onPress={() => {
                                             setInsuffModalVisible(false);
+                                            submitInsuff(insuffcaseDetails?.Candidate?.CandidateID);
+
 
                                         }}>
                                             <Text style={styles.continueText}>Submit</Text>

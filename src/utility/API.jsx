@@ -27,6 +27,8 @@ const API = {
 
   FORMFINALUPLOAD:`${BASE_URL}/field-executives/verification/finish`,
 
+  STARTINSUFF: `${BASE_URL}/insufficiency/raise`,
+
 
 };
 

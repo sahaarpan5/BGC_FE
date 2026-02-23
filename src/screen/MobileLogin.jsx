@@ -99,6 +99,7 @@ const MobileLogin = () => {
           ['ProfilePicture', user.ProfilePicture || ''],
           ['FEVendorID', String(user.FEVendorID || '')],
           ['UserId', String(user.UserId || '')],
+           
         ]);
 
         navigation.replace('DashboardScreen');
